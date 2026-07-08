@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient.js'
 import { fetchRatingSummaries } from './ratingService.js'
+import { logActivity } from './activityService.js'
 
 export async function fetchProfileByUserId(userId) {
   const { data, error } = await supabase
@@ -66,6 +67,7 @@ export async function updateProfile(userId, updates) {
     throw error
   }
 
+  await logActivity('update_profile', { user_id: userId })
   return data
 }
 
@@ -86,5 +88,6 @@ export async function uploadAvatar(file, userId) {
   }
 
   const { data } = supabase.storage.from('avatars').getPublicUrl(path)
+  await logActivity('upload_avatar', { bucket: 'avatars', path })
   return data.publicUrl
 }

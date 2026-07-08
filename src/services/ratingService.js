@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient.js'
+import { logActivity } from './activityService.js'
 
 export async function fetchRatingSummaries(jokeIds = []) {
   if (!jokeIds.length) {
@@ -72,5 +73,6 @@ export async function rateJoke({ jokeId, userId, rating }) {
     throw error
   }
 
+  await logActivity('rate_joke', { joke_id: jokeId, rating: safeRating })
   return data
 }

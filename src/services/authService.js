@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient.js'
+import { logActivity } from './activityService.js'
 
 export async function getSession() {
   const { data, error } = await supabase.auth.getSession()
@@ -157,6 +158,7 @@ export async function signUpWithEmail({ email, password, username }) {
     }
   }
 
+  await logActivity('register', { email })
   return data
 }
 
@@ -170,6 +172,7 @@ export async function signInWithEmail({ email, password }) {
     throw error
   }
 
+  await logActivity('login', { email })
   return data
 }
 
@@ -180,6 +183,7 @@ export async function updateUserEmail(email) {
     throw error
   }
 
+  await logActivity('update_email', { email })
   return data
 }
 

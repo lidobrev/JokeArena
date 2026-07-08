@@ -1,5 +1,6 @@
 import { supabase } from './supabaseClient.js'
 import { fetchRatingSummaries } from './ratingService.js'
+import { logActivity } from './activityService.js'
 
 const JOKE_SELECT = 'id, title, content, image_url, status, created_at, updated_at, author_id, category_id, joke_categories(name, slug), profiles(display_name, username)'
 
@@ -170,6 +171,16 @@ export async function fetchPendingJokes() {
   )
 }
 
+export async function fetchAllJokesForAdmin({ authorId } = {}) {
+  let query = supabase.from('jokes').select(JOKE_SELECT).order('created_at', { ascending: false })
+
+  if (authorId) {
+    query = query.eq('author_id', authorId)
+  }
+
+  return fetchJokesWithRatings(query)
+}
+
 export async function fetchEditSuggestions() {
   const { data, error } = await supabase
     .from('joke_edit_suggestions')
@@ -182,6 +193,24 @@ export async function fetchEditSuggestions() {
   }
 
   return data ?? []
+}
+
+export function extractStoragePath(bucket, publicUrl) {
+  if (!publicUrl) return null
+  const marker = `/storage/v1/object/public/${bucket}/`
+  const index = publicUrl.indexOf(marker)
+  if (index === -1) return null
+  return decodeURIComponent(publicUrl.slice(index + marker.length))
+}
+
+export async function deleteJokeImageByUrl(imageUrl) {
+  const path = extractStoragePath('joke-images', imageUrl)
+  if (!path) return
+
+  const { error } = await supabase.storage.from('joke-images').remove([path])
+  if (error) {
+    console.warn('Unable to delete joke image from storage:', error.message)
+  }
 }
 
 export async function uploadJokeImage(file, userId) {
@@ -201,6 +230,7 @@ export async function uploadJokeImage(file, userId) {
   }
 
   const { data } = supabase.storage.from('joke-images').getPublicUrl(path)
+  await logActivity('upload_joke_image', { bucket: 'joke-images', path })
   return data.publicUrl
 }
 
@@ -222,6 +252,7 @@ export async function createJoke({ title, content, categoryId, authorId, imageUr
     throw error
   }
 
+  await logActivity('create_joke', { joke_id: data.id, title, category_id: categoryId, has_image: Boolean(imageUrl) })
   return data
 }
 
@@ -232,6 +263,7 @@ export async function updateJokeStatus(jokeId, status) {
     throw error
   }
 
+  await logActivity('admin_update_joke_status', { joke_id: jokeId, status })
   return data
 }
 
@@ -252,7 +284,26 @@ export async function updateJokeDraft(jokeId, { title, content, categoryId, imag
     throw error
   }
 
+  await logActivity('update_joke_draft', { joke_id: jokeId })
   return data
+}
+
+export async function deleteJokeById(jokeId) {
+  const joke = await fetchJokeByIdForAdmin(jokeId)
+  if (!joke) {
+    throw new Error('Joke not found.')
+  }
+
+  if (joke.imageUrl) {
+    await deleteJokeImageByUrl(joke.imageUrl)
+  }
+
+  const { error } = await supabase.from('jokes').delete().eq('id', jokeId)
+  if (error) {
+    throw error
+  }
+
+  await logActivity('admin_delete_joke', { joke_id: jokeId, title: joke.title })
 }
 
 export async function updateEditSuggestionStatus(suggestionId, status, adminNotes = null) {
@@ -271,5 +322,6 @@ export async function updateEditSuggestionStatus(suggestionId, status, adminNote
     throw error
   }
 
+  await logActivity('admin_update_edit_suggestion', { suggestion_id: suggestionId, status })
   return data
 }
