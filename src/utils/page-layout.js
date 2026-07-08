@@ -52,7 +52,7 @@ export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text
         <div class="card-body p-4 d-flex flex-column position-relative">
           <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
             <span class="badge rounded-pill joke-category">${safeCategory}</span>
-            <span class="joke-rating-summary"><span class="joke-rating-summary-star" aria-hidden="true">★</span><span>${numericRating.toFixed(1)} / ${escapeHtml(reactions)} votes</span></span>
+            <span class="joke-rating-summary" data-rating-summary-for="${safeId}"><span class="joke-rating-summary-star" aria-hidden="true">★</span><span>${numericRating.toFixed(1)} / ${escapeHtml(reactions)} votes</span></span>
           </div>
 
           <h3 class="h5 fw-bold mb-2">${safeTitle}</h3>
@@ -62,7 +62,7 @@ export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text
 
           <div class="rating-strip text-center position-relative">
             <p class="small text-body-secondary mb-2">Rate this joke</p>
-            <div class="rating-stars" aria-label="Rate this joke from 1 to 5 stars">
+            <div class="rating-stars" data-current-rating="${numericRating}" aria-label="Rate this joke from 1 to 5 stars">
               ${renderStars({ jokeId: safeId, currentRating: numericRating })}
             </div>
           </div>
@@ -201,14 +201,20 @@ export function renderCategorySlider(categories = []) {
             <p class="text-uppercase small fw-semibold text-body-secondary mb-1">Browse by topic</p>
             <h2 class="h4 fw-bold mb-0">Joke Categories</h2>
           </div>
+          <div class="category-slider-controls d-none d-lg-flex gap-2" aria-label="Category slider controls">
+            <button class="btn btn-outline-dark category-slider-btn" type="button" data-category-prev aria-label="Scroll categories left">‹</button>
+            <button class="btn btn-outline-dark category-slider-btn" type="button" data-category-next aria-label="Scroll categories right">›</button>
+          </div>
         </div>
-        <div class="category-slider" aria-label="Joke categories">
-          ${categories.map((category) => `
-            <a class="category-chip" href="/category-jokes.html?category=${escapeHtml(category.slug)}">
-              <span>${escapeHtml(category.name)}</span>
-              <small>View jokes</small>
-            </a>
-          `).join('')}
+        <div class="category-slider-shell">
+          <div class="category-slider" data-category-slider aria-label="Joke categories">
+            ${categories.map((category) => `
+              <a class="category-chip" href="/category-jokes.html?category=${escapeHtml(category.slug)}">
+                <span>${escapeHtml(category.name)}</span>
+                <small>View jokes</small>
+              </a>
+            `).join('')}
+          </div>
         </div>
       </div>
     </section>

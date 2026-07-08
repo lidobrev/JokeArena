@@ -184,6 +184,18 @@ export async function updateUserEmail(email) {
   return data
 }
 
+
+export async function updateUserPassword(newPassword) {
+  const { data, error } = await supabase.auth.updateUser({ password: newPassword })
+
+  if (error) {
+    throw error
+  }
+
+  await logActivity('update_password', {})
+  return data
+}
+
 export async function signOut() {
   const { error } = await supabase.auth.signOut()
   if (error) {

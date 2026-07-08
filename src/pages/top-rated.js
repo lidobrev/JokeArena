@@ -1,8 +1,8 @@
 import { bindLogoutButton, getAuthState } from '../services/authService.js'
 import { fetchApprovedJokes, fetchTopRatedJokes } from '../services/jokeService.js'
-import { rateJoke } from '../services/ratingService.js'
 import { escapeHtml, setDocumentTitle } from '../utils/dom.js'
 import { renderJokeGrid, renderPageShell } from '../utils/page-layout.js'
+import { bindInlineRatingControls } from '../utils/rating-ui.js'
 
 const PAGE_SIZE = 36
 
@@ -37,25 +37,6 @@ function buildMainHtml(jokes, page, totalCount) {
   `
 }
 
-function bindRatings(authState) {
-  document.querySelectorAll('.rating-star[data-joke-id]').forEach((button) => {
-    button.addEventListener('click', async (event) => {
-      event.preventDefault()
-      event.stopPropagation()
-      if (!authState.loggedIn) {
-        window.location.assign('/login.html')
-        return
-      }
-      try {
-        await rateJoke({ jokeId: button.dataset.jokeId, userId: authState.user.id, rating: Number(button.dataset.rating) })
-        window.location.reload()
-      } catch (error) {
-        window.alert(error instanceof Error ? error.message : 'Unable to save your rating right now.')
-      }
-    })
-  })
-}
-
 async function boot() {
   setDocumentTitle('Top Rated Jokes')
   const page = getPage()
@@ -67,7 +48,7 @@ async function boot() {
 
   document.querySelector('#app').innerHTML = renderPageShell('', buildMainHtml(topJokes, page, allJokes.filter((joke) => joke.ratingCount > 0).length), authState)
   bindLogoutButton()
-  bindRatings(authState)
+  bindInlineRatingControls(authState)
 }
 
 boot().catch((error) => {

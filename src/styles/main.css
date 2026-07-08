@@ -1522,3 +1522,67 @@ a:focus-visible {
     min-height: 11rem;
   }
 }
+
+
+/* === Final UX fixes: profile password, category arrows, inline ratings === */
+.joke-card-image-wrap {
+  pointer-events: none;
+}
+
+.rating-stars.is-saving {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+.rating-inline-message {
+  font-weight: 700;
+}
+
+.category-slider-shell {
+  position: relative;
+  overflow: hidden;
+}
+
+.category-slider {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scroll-snap-type: x proximity;
+  padding: 0.25rem 0 1rem;
+  scrollbar-width: thin;
+}
+
+.category-chip {
+  flex: 0 0 220px;
+  scroll-snap-align: start;
+}
+
+.category-slider-btn {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 999px;
+  padding: 0;
+  font-size: 1.75rem;
+  font-weight: 900;
+  line-height: 1;
+  background: rgba(255,255,255,0.82);
+  box-shadow: var(--jokearena-shadow);
+}
+
+@media (max-width: 991.98px) {
+  .category-slider {
+    padding-bottom: 0.75rem;
+  }
+
+  .category-chip {
+    flex-basis: 190px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  #password-change-form .btn,
+  #profile-edit-form .btn {
+    width: 100%;
+  }
+}

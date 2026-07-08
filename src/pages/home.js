@@ -1,9 +1,9 @@
 import { bindLogoutButton, getAuthState } from '../services/authService.js'
 import { fetchApprovedJokes, fetchCategories, fetchTopRatedJokes } from '../services/jokeService.js'
 import { fetchCreators } from '../services/profileService.js'
-import { rateJoke } from '../services/ratingService.js'
 import { escapeHtml, setDocumentTitle } from '../utils/dom.js'
 import { renderCategorySlider, renderCreatorsGrid, renderJokeGrid, renderPageShell, renderSeeMoreButton, renderStatCard } from '../utils/page-layout.js'
+import { bindInlineRatingControls } from '../utils/rating-ui.js'
 
 function buildMainHtml(authState, categories, latestJokes, topRatedJokes, creators) {
   const allPreviewJokes = [...latestJokes, ...topRatedJokes]
@@ -94,31 +94,16 @@ function buildMainHtml(authState, categories, latestJokes, topRatedJokes, creato
   `
 }
 
-function bindListRatings(authState) {
-  document.querySelectorAll('.rating-star[data-joke-id]').forEach((button) => {
-    button.addEventListener('click', async (event) => {
-      event.preventDefault()
-      event.stopPropagation()
+function bindCategorySlider() {
+  const slider = document.querySelector('[data-category-slider]')
+  const prev = document.querySelector('[data-category-prev]')
+  const next = document.querySelector('[data-category-next]')
 
-      if (!authState.loggedIn) {
-        window.location.assign('/login.html')
-        return
-      }
+  if (!slider || !prev || !next) return
 
-      const jokeId = button.dataset.jokeId
-      const rating = Number(button.dataset.rating)
-
-      try {
-        button.closest('.rating-stars')?.querySelectorAll('button').forEach((star) => {
-          star.disabled = true
-        })
-        await rateJoke({ jokeId, userId: authState.user.id, rating })
-        window.location.reload()
-      } catch (error) {
-        window.alert(error instanceof Error ? error.message : 'Unable to save your rating right now.')
-      }
-    })
-  })
+  const scrollAmount = () => Math.max(280, Math.floor(slider.clientWidth * 0.75))
+  prev.addEventListener('click', () => slider.scrollBy({ left: -scrollAmount(), behavior: 'smooth' }))
+  next.addEventListener('click', () => slider.scrollBy({ left: scrollAmount(), behavior: 'smooth' }))
 }
 
 async function boot() {
@@ -134,7 +119,8 @@ async function boot() {
 
   document.querySelector('#app').innerHTML = renderPageShell('home', buildMainHtml(authState, categories, latestJokes, topRatedJokes, creators), authState)
   bindLogoutButton()
-  bindListRatings(authState)
+  bindInlineRatingControls(authState)
+  bindCategorySlider()
 }
 
 boot().catch((error) => {

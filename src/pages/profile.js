@@ -1,4 +1,4 @@
-import { bindLogoutButton, getAuthState } from '../services/authService.js'
+import { bindLogoutButton, getAuthState, updateUserPassword } from '../services/authService.js'
 import { fetchProfileByUserId, fetchProfileJokes, removeAvatar, updateProfile, uploadAvatar } from '../services/profileService.js'
 import { escapeHtml, initialsFromName, setDocumentTitle } from '../utils/dom.js'
 import { renderFormField, renderMiniJokeCard, renderPageShell } from '../utils/page-layout.js'
@@ -66,6 +66,29 @@ function renderEditForm(profile, authState) {
   `
 }
 
+
+function renderPasswordForm() {
+  return `
+    <div class="card profile-card border-0 shadow-sm mb-4">
+      <div class="card-body p-4 p-xl-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+          <div>
+            <p class="text-uppercase small fw-semibold text-body-secondary mb-1">Security</p>
+            <h2 class="h4 fw-bold mb-0">Change Password</h2>
+          </div>
+          <span class="badge rounded-pill joke-pill">Supabase Auth</span>
+        </div>
+        <form id="password-change-form" novalidate>
+          ${renderFormField({ label: 'New password', type: 'password', name: 'newPassword', placeholder: 'Enter a new password' })}
+          ${renderFormField({ label: 'Confirm new password', type: 'password', name: 'confirmNewPassword', placeholder: 'Repeat the new password' })}
+          <button class="btn btn-outline-dark btn-lg" type="submit">Change Password</button>
+        </form>
+      </div>
+    </div>
+  `
+}
+
+
 function buildMainHtml(profile, allJokes, authState, isOwnProfile, messageHtml = '') {
   const displayName = profile.display_name || 'JokeArena user'
   const publishedJokes = allJokes.filter((joke) => joke.status === 'approved')
@@ -88,7 +111,7 @@ function buildMainHtml(profile, allJokes, authState, isOwnProfile, messageHtml =
           </div>
 
           <div class="col-lg-8">
-            ${isOwnProfile ? renderEditForm(profile, authState) : ''}
+            ${isOwnProfile ? renderEditForm(profile, authState) + renderPasswordForm() : ''}
             ${renderJokeSection('Published jokes', publishedJokes, isOwnProfile ? 'You do not have approved jokes yet.' : 'This creator does not have approved jokes yet.')}
             ${isOwnProfile ? renderJokeSection('Pending jokes', pendingJokes, 'You do not have pending jokes right now.') : ''}
             ${isOwnProfile ? '<a class="btn btn-warning" href="/create-joke.html">Create joke</a>' : ''}
@@ -143,6 +166,45 @@ async function boot() {
     } catch (error) {
       cardBody.querySelector('.alert-danger, .alert-success')?.remove()
       cardBody.insertAdjacentHTML('afterbegin', `<div class="alert alert-danger" role="alert">${escapeHtml(error instanceof Error ? error.message : 'Unable to delete avatar.')}</div>`)
+    }
+  })
+
+
+  const passwordForm = document.querySelector('#password-change-form')
+  const passwordCardBody = passwordForm?.parentElement
+
+  passwordForm?.addEventListener('submit', async (event) => {
+    event.preventDefault()
+    passwordCardBody?.querySelector('.alert-danger, .alert-success')?.remove()
+
+    const formData = new FormData(passwordForm)
+    const newPassword = String(formData.get('newPassword') ?? '')
+    const confirmNewPassword = String(formData.get('confirmNewPassword') ?? '')
+
+    if (newPassword.length < 6) {
+      passwordCardBody?.insertAdjacentHTML('afterbegin', '<div class="alert alert-danger" role="alert">Password must be at least 6 characters.</div>')
+      return
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      passwordCardBody?.insertAdjacentHTML('afterbegin', '<div class="alert alert-danger" role="alert">Passwords do not match.</div>')
+      return
+    }
+
+    try {
+      const button = passwordForm.querySelector('button[type="submit"]')
+      button.disabled = true
+      button.textContent = 'Changing...'
+      await updateUserPassword(newPassword)
+      passwordForm.reset()
+      passwordCardBody?.insertAdjacentHTML('afterbegin', '<div class="alert alert-success" role="alert">Password changed successfully.</div>')
+      button.disabled = false
+      button.textContent = 'Change Password'
+    } catch (error) {
+      passwordCardBody?.insertAdjacentHTML('afterbegin', `<div class="alert alert-danger" role="alert">${escapeHtml(error instanceof Error ? error.message : 'Unable to change password.')}</div>`)
+      const button = passwordForm.querySelector('button[type="submit"]')
+      button.disabled = false
+      button.textContent = 'Change Password'
     }
   })
 

@@ -1,8 +1,8 @@
 import { bindLogoutButton, getAuthState } from '../services/authService.js'
 import { fetchApprovedJokesByCategoryCount, fetchApprovedJokesByCategorySlug, fetchCategoryBySlug } from '../services/jokeService.js'
-import { rateJoke } from '../services/ratingService.js'
 import { escapeHtml, setDocumentTitle } from '../utils/dom.js'
 import { renderJokeGrid, renderPageShell } from '../utils/page-layout.js'
+import { bindInlineRatingControls } from '../utils/rating-ui.js'
 
 const PAGE_SIZE = 36
 
@@ -23,25 +23,6 @@ function renderPagination(slug, currentPage, totalCount) {
     return `<li class="page-item${page === currentPage ? ' active' : ''}"><a class="page-link" href="/category-jokes.html?category=${escapeHtml(slug)}&page=${page}">${page}</a></li>`
   }).join('')
   return `<nav aria-label="Category joke pages"><ul class="pagination justify-content-center mt-5">${items}</ul></nav>`
-}
-
-function bindRatings(authState) {
-  document.querySelectorAll('.rating-star[data-joke-id]').forEach((button) => {
-    button.addEventListener('click', async (event) => {
-      event.preventDefault()
-      event.stopPropagation()
-      if (!authState.loggedIn) {
-        window.location.assign('/login.html')
-        return
-      }
-      try {
-        await rateJoke({ jokeId: button.dataset.jokeId, userId: authState.user.id, rating: Number(button.dataset.rating) })
-        window.location.reload()
-      } catch (error) {
-        window.alert(error instanceof Error ? error.message : 'Unable to save your rating right now.')
-      }
-    })
-  })
 }
 
 async function boot() {
@@ -77,7 +58,7 @@ async function boot() {
     </section>
   `, authState)
   bindLogoutButton()
-  bindRatings(authState)
+  bindInlineRatingControls(authState)
 }
 
 boot().catch((error) => {
