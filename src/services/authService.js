@@ -173,6 +173,16 @@ export async function signInWithEmail({ email, password }) {
   return data
 }
 
+export async function updateUserEmail(email) {
+  const { data, error } = await supabase.auth.updateUser({ email })
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
 export async function signOut() {
   const { error } = await supabase.auth.signOut()
   if (error) {

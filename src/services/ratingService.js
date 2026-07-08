@@ -5,10 +5,7 @@ export async function fetchRatingSummaries(jokeIds = []) {
     return new Map()
   }
 
-  const { data, error } = await supabase
-    .from('joke_ratings')
-    .select('joke_id, rating')
-    .in('joke_id', jokeIds)
+  const { data, error } = await supabase.from('joke_ratings').select('joke_id, rating').in('joke_id', jokeIds)
 
   if (error) {
     throw error
@@ -60,18 +57,14 @@ export async function fetchUserRating(jokeId, userId) {
 }
 
 export async function rateJoke({ jokeId, userId, rating }) {
+  const safeRating = Number(rating)
+  if (!jokeId || !userId || safeRating < 1 || safeRating > 5) {
+    throw new Error('Choose a rating between 1 and 5.')
+  }
+
   const { data, error } = await supabase
     .from('joke_ratings')
-    .upsert(
-      {
-        joke_id: jokeId,
-        user_id: userId,
-        rating,
-      },
-      {
-        onConflict: 'joke_id,user_id',
-      }
-    )
+    .upsert({ joke_id: jokeId, user_id: userId, rating: safeRating }, { onConflict: 'joke_id,user_id' })
     .select('id, joke_id, user_id, rating')
     .single()
 

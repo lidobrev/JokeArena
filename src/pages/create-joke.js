@@ -1,5 +1,5 @@
 import { getAuthState, bindLogoutButton, ensureCurrentProfile } from '../services/authService.js'
-import { createJoke, fetchCategories } from '../services/jokeService.js'
+import { createJoke, fetchCategories, uploadJokeImage } from '../services/jokeService.js'
 import { escapeHtml, setDocumentTitle } from '../utils/dom.js'
 import { renderFormField, renderPageShell } from '../utils/page-layout.js'
 
@@ -70,6 +70,7 @@ async function boot() {
     const title = String(formData.get('title') ?? '').trim()
     const content = String(formData.get('content') ?? '').trim()
     const categoryId = String(formData.get('categoryId') ?? '').trim()
+    const imageFile = formData.get('image-upload')
 
     cardBody.querySelector('.alert:not(.alert-warning)')?.remove()
 
@@ -85,11 +86,14 @@ async function boot() {
 
       await ensureCurrentProfile(authState.user)
 
+      const imageUrl = imageFile instanceof File && imageFile.size > 0 ? await uploadJokeImage(imageFile, authState.user.id) : null
+
       await createJoke({
         title,
         content,
         categoryId,
         authorId: authState.user.id,
+        imageUrl,
       })
 
       window.location.assign('/profile.html?submitted=1')

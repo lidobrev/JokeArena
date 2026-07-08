@@ -1,11 +1,13 @@
 import { bindLogoutButton, getAuthState } from '../services/authService.js'
-import { fetchApprovedJokes } from '../services/jokeService.js'
+import { fetchApprovedJokes, fetchTopRatedJokes } from '../services/jokeService.js'
+import { rateJoke } from '../services/ratingService.js'
 import { escapeHtml, setDocumentTitle } from '../utils/dom.js'
-import { renderFeaturedJokeCard, renderPageShell, renderStatCard } from '../utils/page-layout.js'
+import { renderJokeGrid, renderPageShell, renderStatCard } from '../utils/page-layout.js'
 
-function buildMainHtml(authState, jokes) {
-  const totalVotes = jokes.reduce((sum, joke) => sum + joke.ratingCount, 0)
-  const weightedRating = jokes.reduce((sum, joke) => sum + joke.ratingAverage * joke.ratingCount, 0)
+function buildMainHtml(authState, latestJokes, topRatedJokes) {
+  const allPreviewJokes = [...latestJokes, ...topRatedJokes]
+  const totalVotes = allPreviewJokes.reduce((sum, joke) => sum + joke.ratingCount, 0)
+  const weightedRating = allPreviewJokes.reduce((sum, joke) => sum + joke.ratingAverage * joke.ratingCount, 0)
   const averageRating = totalVotes > 0 ? weightedRating / totalVotes : 0
   const heroBadge = authState.loggedIn ? 'Signed in' : 'Guest browsing'
   const heroTitle = authState.loggedIn
@@ -41,7 +43,7 @@ function buildMainHtml(authState, jokes) {
     <section class="py-4 py-lg-5 border-top border-opacity-10">
       <div class="container">
         <div class="row g-3">
-          ${renderStatCard({ icon: '🤣', label: 'Approved jokes', value: jokes.length.toString() })}
+          ${renderStatCard({ icon: '🤣', label: 'Latest jokes', value: latestJokes.length.toString() })}
           ${renderStatCard({ icon: '⭐', label: 'Average rating', value: totalVotes ? averageRating.toFixed(1) : '0.0' })}
           ${renderStatCard({ icon: '🗳️', label: 'Total votes', value: totalVotes.toString() })}
         </div>
@@ -52,37 +54,69 @@ function buildMainHtml(authState, jokes) {
       <div class="container">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
           <div>
-            <h2 class="h3 mb-0">Approved Jokes</h2>
+            <p class="text-uppercase small fw-semibold text-body-secondary mb-1">Newest approved jokes</p>
+            <h2 class="h3 mb-0">Latest Jokes</h2>
           </div>
-          <span class="badge rounded-pill joke-pill">Live data</span>
+          <a class="btn btn-outline-dark" href="/latest-jokes.html">View all latest</a>
         </div>
-        ${jokes.length
-          ? `<div class="row g-4">${jokes
-              .map(
-                (joke) => renderFeaturedJokeCard({
-                  category: joke.category,
-                  title: joke.title,
-                  text: joke.content,
-                  author: joke.authorName,
-                  authorHref: '',
-                  reactions: joke.ratingCount,
-                  rating: joke.ratingAverage,
-                  href: `/joke-details.html?id=${joke.id}`,
-                })
-              )
-              .join('')}</div>`
-          : '<div class="alert alert-info mb-0" role="alert">No approved jokes yet. Check back after the first submissions are reviewed.</div>'}
+        ${renderJokeGrid(latestJokes)}
+      </div>
+    </section>
+
+    <section class="py-5 py-lg-6 border-top border-opacity-10">
+      <div class="container">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+          <div>
+            <p class="text-uppercase small fw-semibold text-body-secondary mb-1">Audience favorites</p>
+            <h2 class="h3 mb-0">Top Rated Jokes</h2>
+          </div>
+          <a class="btn btn-outline-dark" href="/top-rated.html">View all top rated</a>
+        </div>
+        ${renderJokeGrid(topRatedJokes)}
       </div>
     </section>
   `
 }
 
+function bindListRatings(authState) {
+  document.querySelectorAll('.rating-star[data-joke-id]').forEach((button) => {
+    button.addEventListener('click', async (event) => {
+      event.preventDefault()
+      event.stopPropagation()
+
+      if (!authState.loggedIn) {
+        window.location.assign('/login.html')
+        return
+      }
+
+      const jokeId = button.dataset.jokeId
+      const rating = Number(button.dataset.rating)
+
+      try {
+        button.closest('.rating-stars')?.querySelectorAll('button').forEach((star) => {
+          star.disabled = true
+        })
+        await rateJoke({ jokeId, userId: authState.user.id, rating })
+        window.location.reload()
+      } catch (error) {
+        window.alert(error instanceof Error ? error.message : 'Unable to save your rating right now.')
+      }
+    })
+  })
+}
+
 async function boot() {
   setDocumentTitle('Home')
 
-  const [authState, jokes] = await Promise.all([getAuthState(), fetchApprovedJokes()])
-  document.querySelector('#app').innerHTML = renderPageShell('home', buildMainHtml(authState, jokes), authState)
+  const [authState, latestJokes, topRatedJokes] = await Promise.all([
+    getAuthState(),
+    fetchApprovedJokes({ limit: 9 }),
+    fetchTopRatedJokes({ limit: 9 }),
+  ])
+
+  document.querySelector('#app').innerHTML = renderPageShell('home', buildMainHtml(authState, latestJokes, topRatedJokes), authState)
   bindLogoutButton()
+  bindListRatings(authState)
 }
 
 boot().catch((error) => {

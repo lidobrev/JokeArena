@@ -8,7 +8,23 @@ export function renderPageShell(activePageId, mainHtml, authState = {}) {
   return `${renderNavbar(activePageId, authState)}<main>${mainHtml}</main>`
 }
 
-export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text, author, authorHref = '/profile.html', reactions, rating = 0, href }) {
+export function renderStars({ jokeId, currentRating = 0 } = {}) {
+  return Array.from({ length: 5 }, (_, index) => {
+    const rating = index + 1
+    const active = rating <= Math.round(Number(currentRating) || 0)
+    return `
+      <button
+        class="rating-star${active ? ' active' : ''}"
+        type="button"
+        data-joke-id="${escapeHtml(jokeId)}"
+        data-rating="${rating}"
+        aria-label="Rate ${rating} star${rating === 1 ? '' : 's'}"
+      >★</button>
+    `
+  }).join('')
+}
+
+export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text, author, authorHref = '/profile.html', reactions, rating = 0, href, id }) {
   const numericRating = Number(rating) || 0
   const safeCategory = escapeHtml(category)
   const safeTitle = escapeHtml(title)
@@ -16,13 +32,10 @@ export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text
   const safeAuthor = escapeHtml(author)
   const safeAuthorHref = escapeHtml(authorHref)
   const safeHref = escapeHtml(href)
-  const authorMarkup = authorHref ? `<a class="joke-author-link fw-semibold" href="${safeAuthorHref}">By ${safeAuthor}</a>` : `<span class="joke-author-link fw-semibold">By ${safeAuthor}</span>`
-
-  const starsMarkup = Array.from({ length: 5 }, (_, index) => `
-    <button class="rating-star" type="button" aria-label="Rate ${index + 1} star${index === 0 ? '' : 's'}">
-      ★
-    </button>
-  `).join('')
+  const safeId = escapeHtml(id || '')
+  const authorMarkup = authorHref
+    ? `<a class="joke-author-link fw-semibold" href="${safeAuthorHref}">By ${safeAuthor}</a>`
+    : `<span class="joke-author-link fw-semibold">By ${safeAuthor}</span>`
 
   return `
     <div class="col-lg-4 col-md-6">
@@ -32,7 +45,7 @@ export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text
         <div class="card-body p-4 d-flex flex-column position-relative">
           <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
             <span class="badge rounded-pill joke-category">${safeCategory}</span>
-            <span class="joke-rating-summary"><span class="joke-rating-summary-star" aria-hidden="true">★</span><span>${numericRating.toFixed(1)} / ${reactions} votes</span></span>
+            <span class="joke-rating-summary"><span class="joke-rating-summary-star" aria-hidden="true">★</span><span>${numericRating.toFixed(1)} / ${escapeHtml(reactions)} votes</span></span>
           </div>
 
           <h3 class="h5 fw-bold mb-2">${safeTitle}</h3>
@@ -43,7 +56,7 @@ export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text
           <div class="rating-strip text-center position-relative">
             <p class="small text-body-secondary mb-2">Rate this joke</p>
             <div class="rating-stars" aria-label="Rate this joke from 1 to 5 stars">
-              ${starsMarkup}
+              ${renderStars({ jokeId: safeId, currentRating: numericRating })}
             </div>
           </div>
         </div>
@@ -87,7 +100,7 @@ export function renderFormField({ label, type = 'text', name, placeholder, value
     return `
       <div class="mb-3">
         <label class="form-label fw-semibold" for="${safeName}">${safeLabel}</label>
-        <input class="form-control form-control-lg" type="file" id="${safeName}" name="${safeName}" />
+        <input class="form-control form-control-lg" type="file" id="${safeName}" name="${safeName}" accept="image/*" />
       </div>
     `
   }
@@ -112,17 +125,42 @@ export function renderStatCard({ icon, label, value }) {
   `
 }
 
-export function renderMiniJokeCard({ category, title, reactions }) {
+export function renderMiniJokeCard({ id, category, title, reactions, status }) {
+  const href = id ? `/joke-details.html?id=${escapeHtml(id)}` : '#'
+  const statusBadge = status ? `<span class="badge rounded-pill ${status === 'approved' ? 'text-bg-success' : 'text-bg-warning'}">${escapeHtml(status)}</span>` : ''
+
   return `
     <article class="mini-joke-card p-3 rounded-4 h-100">
-      <div class="d-flex align-items-center justify-content-between mb-2">
+      <div class="d-flex align-items-center justify-content-between mb-2 gap-2">
         <span class="badge rounded-pill joke-category">${escapeHtml(category)}</span>
-        <span class="small text-body-secondary">${escapeHtml(reactions)} reactions</span>
+        ${statusBadge}
       </div>
-      <h3 class="h6 fw-bold mb-2">${escapeHtml(title)}</h3>
-      <p class="small text-body-secondary mb-0">A joke entry from the current profile.</p>
+      <h3 class="h6 fw-bold mb-2"><a href="${href}">${escapeHtml(title)}</a></h3>
+      <p class="small text-body-secondary mb-0">${escapeHtml(reactions)} votes</p>
     </article>
   `
+}
+
+export function renderJokeGrid(jokes) {
+  if (!jokes.length) {
+    return '<div class="alert alert-info mb-0" role="alert">No jokes to show yet.</div>'
+  }
+
+  return `<div class="row g-4">${jokes
+    .map((joke) =>
+      renderFeaturedJokeCard({
+        id: joke.id,
+        category: joke.category,
+        title: joke.title,
+        text: joke.content,
+        author: joke.authorName,
+        authorHref: joke.authorHref,
+        reactions: joke.ratingCount,
+        rating: joke.ratingAverage,
+        href: `/joke-details.html?id=${joke.id}`,
+      }),
+    )
+    .join('')}</div>`
 }
 
 export function renderModerationRow({ type, item, status, reportedBy, updatedAt }) {
