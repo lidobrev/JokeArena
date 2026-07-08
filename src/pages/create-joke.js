@@ -1,4 +1,4 @@
-import { getAuthState, bindLogoutButton } from '../services/authService.js'
+import { getAuthState, bindLogoutButton, ensureCurrentProfile } from '../services/authService.js'
 import { createJoke, fetchCategories } from '../services/jokeService.js'
 import { escapeHtml, setDocumentTitle } from '../utils/dom.js'
 import { renderFormField, renderPageShell } from '../utils/page-layout.js'
@@ -47,6 +47,16 @@ async function boot() {
   }
 
   const categories = await fetchCategories()
+  if (!categories.length) {
+    document.querySelector('#app').innerHTML = renderPageShell(
+      'create-joke',
+      '<div class="container py-5"><div class="alert alert-warning" role="alert">No joke categories are available. Run the Supabase seed/migration first.</div></div>',
+      authState,
+    )
+    bindLogoutButton()
+    return
+  }
+
   document.querySelector('#app').innerHTML = renderPageShell('create-joke', buildMainHtml(categories), authState)
   bindLogoutButton()
 
@@ -72,6 +82,8 @@ async function boot() {
       const submitButton = form.querySelector('button[type="submit"]')
       submitButton.disabled = true
       submitButton.textContent = 'Publishing...'
+
+      await ensureCurrentProfile(authState.user)
 
       await createJoke({
         title,
