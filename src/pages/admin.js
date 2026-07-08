@@ -15,7 +15,12 @@ function buildMainHtml(pendingJokes, suggestions) {
         .map(
           (joke) => `
             <tr>
-              <td>${escapeHtml(joke.title)}</td>
+              <td>
+                <div class="d-flex align-items-center gap-3">
+                  ${joke.imageUrl ? `<img class="admin-joke-thumb" src="${escapeHtml(joke.imageUrl)}" alt="${escapeHtml(joke.title)}" />` : '<div class="admin-joke-thumb admin-joke-thumb-placeholder" aria-hidden="true"></div>'}
+                  <span>${escapeHtml(joke.title)}</span>
+                </div>
+              </td>
               <td>${escapeHtml(joke.category)}</td>
               <td>${escapeHtml(joke.authorName)}</td>
               <td>${escapeHtml(formatDateTime(joke.createdAt))}</td>

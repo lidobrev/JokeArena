@@ -25,7 +25,7 @@ function renderJokeSection(title, jokes, emptyText) {
           </div>
         </div>
         ${jokes.length
-          ? `<div class="row g-3">${jokes.map((joke) => renderMiniJokeCard({ id: joke.id, category: joke.category, title: joke.title, reactions: joke.ratingCount, status: joke.status })).join('')}</div>`
+          ? `<div class="row g-3">${jokes.map((joke) => renderMiniJokeCard({ id: joke.id, category: joke.category, title: joke.title, reactions: joke.ratingCount, status: joke.status, imageUrl: joke.imageUrl })).join('')}</div>`
           : `<div class="alert alert-info mb-0" role="alert">${escapeHtml(emptyText)}</div>`}
       </div>
     </div>

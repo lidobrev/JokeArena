@@ -24,7 +24,7 @@ export function renderStars({ jokeId, currentRating = 0 } = {}) {
   }).join('')
 }
 
-export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text, author, authorHref = '/profile.html', reactions, rating = 0, href, id }) {
+export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text, author, authorHref = '/profile.html', reactions, rating = 0, href, id, imageUrl }) {
   const numericRating = Number(rating) || 0
   const safeCategory = escapeHtml(category)
   const safeTitle = escapeHtml(title)
@@ -33,6 +33,7 @@ export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text
   const safeAuthorHref = escapeHtml(authorHref)
   const safeHref = escapeHtml(href)
   const safeId = escapeHtml(id || '')
+  const safeImageUrl = imageUrl ? escapeHtml(imageUrl) : ''
   const authorMarkup = authorHref
     ? `<a class="joke-author-link fw-semibold" href="${safeAuthorHref}">By ${safeAuthor}</a>`
     : `<span class="joke-author-link fw-semibold">By ${safeAuthor}</span>`
@@ -41,6 +42,12 @@ export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text
     <div class="col-lg-4 col-md-6">
       <article class="card joke-card h-100 border-0 shadow-sm">
         <a class="joke-card-overlay" href="${safeHref}" aria-label="View joke details"></a>
+
+        <div class="joke-card-image-wrap">
+          ${safeImageUrl
+            ? `<img class="joke-card-image" src="${safeImageUrl}" alt="${safeTitle}" loading="lazy" />`
+            : `<div class="joke-card-image-placeholder" aria-hidden="true"><span></span></div>`}
+        </div>
 
         <div class="card-body p-4 d-flex flex-column position-relative">
           <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
@@ -125,12 +132,16 @@ export function renderStatCard({ icon, label, value }) {
   `
 }
 
-export function renderMiniJokeCard({ id, category, title, reactions, status }) {
+export function renderMiniJokeCard({ id, category, title, reactions, status, imageUrl }) {
   const href = id ? `/joke-details.html?id=${escapeHtml(id)}` : '#'
   const statusBadge = status ? `<span class="badge rounded-pill ${status === 'approved' ? 'text-bg-success' : 'text-bg-warning'}">${escapeHtml(status)}</span>` : ''
+  const imageMarkup = imageUrl
+    ? `<img class="mini-joke-image" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" loading="lazy" />`
+    : '<div class="mini-joke-image mini-joke-image-placeholder" aria-hidden="true"></div>'
 
   return `
     <article class="mini-joke-card p-3 rounded-4 h-100">
+      <a class="mini-joke-media d-block mb-3" href="${href}">${imageMarkup}</a>
       <div class="d-flex align-items-center justify-content-between mb-2 gap-2">
         <span class="badge rounded-pill joke-category">${escapeHtml(category)}</span>
         ${statusBadge}
@@ -158,6 +169,7 @@ export function renderJokeGrid(jokes) {
         reactions: joke.ratingCount,
         rating: joke.ratingAverage,
         href: `/joke-details.html?id=${joke.id}`,
+        imageUrl: joke.imageUrl,
       }),
     )
     .join('')}</div>`
