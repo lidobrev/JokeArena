@@ -1,12 +1,20 @@
-const navItems = [
+import { escapeHtml } from '../utils/dom.js'
+
+const guestNavItems = [
   { label: 'Home', href: '/index.html', pageId: 'home' },
   { label: 'Login', href: '/login.html', pageId: 'login' },
   { label: 'Register', href: '/register.html', pageId: 'register' },
 ]
 
-// TODO: Add authenticated navigation after Supabase authentication is implemented.
+const userNavItems = [
+  { label: 'Home', href: '/index.html', pageId: 'home' },
+  { label: 'Create Joke', href: '/create-joke.html', pageId: 'create-joke' },
+  { label: 'Profile', href: '/profile.html', pageId: 'profile' },
+]
 
-export function renderNavbar(activePageId = 'home') {
+export function renderNavbar(activePageId = 'home', authState = {}) {
+  const navItems = authState.loggedIn ? userNavItems : guestNavItems
+
   return `
     <nav class="navbar navbar-expand-lg navbar-dark joke-navbar sticky-top shadow-sm">
       <div class="container">
@@ -42,6 +50,28 @@ export function renderNavbar(activePageId = 'home') {
                 `,
               )
               .join('')}
+            ${authState.loggedIn && authState.isAdmin
+              ? `
+                <li class="nav-item">
+                  <a
+                    class="nav-link nav-pill${activePageId === 'admin' ? ' active' : ''}"
+                    ${activePageId === 'admin' ? 'aria-current="page"' : ''}
+                    href="/admin.html"
+                  >
+                    Admin
+                  </a>
+                </li>
+              `
+              : ''}
+            ${authState.loggedIn
+              ? `
+                <li class="nav-item">
+                  <button class="btn btn-warning btn-sm rounded-pill px-3 fw-semibold" type="button" data-logout-button>
+                    Logout
+                  </button>
+                </li>
+              `
+              : ''}
           </ul>
         </div>
       </div>
