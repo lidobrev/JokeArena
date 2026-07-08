@@ -1,10 +1,23 @@
 import { bindLogoutButton, getAuthState } from '../services/authService.js'
-import { fetchCategories, fetchEditableJokeById, fetchJokeByIdForAdmin, updateJokeDraft } from '../services/jokeService.js'
+import { deleteJokeImageByUrl, fetchCategories, fetchEditableJokeById, fetchJokeByIdForAdmin, updateJokeDraft, uploadJokeImage } from '../services/jokeService.js'
 import { escapeHtml, getQueryParam, setDocumentTitle } from '../utils/dom.js'
 import { renderFormField, renderPageShell } from '../utils/page-layout.js'
 
 function buildMainHtml(joke, categories, messageHtml = '') {
   const categoryOptions = categories.map((category) => ({ value: category.id, label: category.name }))
+  const currentImageHtml = joke.imageUrl
+    ? `
+      <div class="current-joke-image-panel mb-4">
+        <p class="form-label fw-semibold mb-2">Current image</p>
+        <img class="current-joke-image" src="${escapeHtml(joke.imageUrl)}" alt="${escapeHtml(joke.title)}" />
+        <div class="form-check mt-3">
+          <input class="form-check-input" type="checkbox" id="remove-image" name="remove-image" value="1" />
+          <label class="form-check-label fw-semibold" for="remove-image">Remove current image</label>
+        </div>
+        <p class="small text-body-secondary mb-0 mt-2">Uploading a new image will replace the current one and remove the old file from Storage.</p>
+      </div>
+    `
+    : '<div class="alert alert-light border mb-4" role="alert">This joke has no image yet. You can upload one below.</div>'
 
   return `
     <section class="py-5 py-lg-6">
@@ -30,7 +43,8 @@ function buildMainHtml(joke, categories, messageHtml = '') {
                     selectedValue: joke.categoryId,
                   })}
                   ${renderFormField({ label: 'Joke Text', type: 'textarea', name: 'content', placeholder: 'Write the full joke here...', value: joke.content })}
-                  ${renderFormField({ label: 'Optional Image Upload', type: 'file', name: 'image-upload' })}
+                  ${currentImageHtml}
+                  ${renderFormField({ label: joke.imageUrl ? 'Change Image' : 'Optional Image Upload', type: 'file', name: 'image-upload' })}
                   <div class="alert alert-info mb-4" role="alert">Only pending jokes can be edited after submission.</div>
                   <button class="btn btn-warning btn-lg" type="submit">Save Changes</button>
                 </form>
@@ -79,8 +93,10 @@ async function boot() {
     const title = String(formData.get('title') ?? '').trim()
     const content = String(formData.get('content') ?? '').trim()
     const categoryId = String(formData.get('categoryId') ?? '').trim()
+    const imageFile = formData.get('image-upload')
+    const removeImage = formData.get('remove-image') === '1'
 
-    cardBody.querySelector('.alert:not(.alert-info)')?.remove()
+    cardBody.querySelector('.alert:not(.alert-info):not(.alert-light)')?.remove()
 
     if (!title || !content || !categoryId) {
       cardBody.insertAdjacentHTML('afterbegin', '<div class="alert alert-danger" role="alert">Please fill in the title, category, and joke text.</div>')
@@ -92,8 +108,22 @@ async function boot() {
       submitButton.disabled = true
       submitButton.textContent = 'Saving...'
 
-      await updateJokeDraft(joke.id, { title, content, categoryId })
-      window.location.assign(`/joke-details.html?id=${joke.id}`)
+      let imageUrl
+
+      if (removeImage) {
+        if (joke.imageUrl) {
+          await deleteJokeImageByUrl(joke.imageUrl)
+        }
+        imageUrl = null
+      } else if (imageFile instanceof File && imageFile.size > 0) {
+        imageUrl = await uploadJokeImage(imageFile, authState.user.id)
+        if (joke.imageUrl) {
+          await deleteJokeImageByUrl(joke.imageUrl)
+        }
+      }
+
+      await updateJokeDraft(joke.id, { title, content, categoryId, imageUrl })
+      window.location.assign(authState.isAdmin ? '/admin.html?tab=jokes' : '/profile.html')
     } catch (error) {
       cardBody.insertAdjacentHTML('afterbegin', `<div class="alert alert-danger" role="alert">${escapeHtml(error instanceof Error ? error.message : 'Unable to save the changes right now.')}</div>`)
       const submitButton = form.querySelector('button[type="submit"]')

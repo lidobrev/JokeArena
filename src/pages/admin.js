@@ -47,16 +47,16 @@ function renderDashboard(pendingJokes, suggestions) {
   const pendingJokesRows = pendingJokes.length
     ? pendingJokes.map((joke) => `
       <tr>
-        <td>
+        <td data-label="Item">
           <div class="d-flex align-items-center gap-3">
             ${joke.imageUrl ? `<img class="admin-joke-thumb" src="${escapeHtml(joke.imageUrl)}" alt="${escapeHtml(joke.title)}" />` : '<div class="admin-joke-thumb admin-joke-thumb-placeholder" aria-hidden="true"></div>'}
             <span>${escapeHtml(joke.title)}</span>
           </div>
         </td>
-        <td>${escapeHtml(joke.category)}</td>
-        <td><a href="${escapeHtml(joke.authorHref)}">${escapeHtml(joke.authorName)}</a></td>
-        <td>${escapeHtml(formatDateTime(joke.createdAt))}</td>
-        <td>
+        <td data-label="Category">${escapeHtml(joke.category)}</td>
+        <td data-label="Author"><a href="${escapeHtml(joke.authorHref)}">${escapeHtml(joke.authorName)}</a></td>
+        <td data-label="Submitted">${escapeHtml(formatDateTime(joke.createdAt))}</td>
+        <td data-label="Actions">
           <div class="d-flex flex-wrap gap-2">
             <button class="btn btn-sm btn-success" type="button" data-joke-action="approve" data-joke-id="${joke.id}">Approve</button>
             <button class="btn btn-sm btn-outline-danger" type="button" data-joke-action="reject" data-joke-id="${joke.id}">Reject</button>
@@ -68,11 +68,11 @@ function renderDashboard(pendingJokes, suggestions) {
   const suggestionRows = suggestions.length
     ? suggestions.map((suggestion) => `
       <tr>
-        <td>${escapeHtml(suggestion.jokes?.title || 'Unknown joke')}</td>
-        <td>${escapeHtml(suggestion.suggested_title || suggestion.jokes?.title || '')}</td>
-        <td>${escapeHtml((suggestion.suggested_content || '').slice(0, 120))}${suggestion.suggested_content && suggestion.suggested_content.length > 120 ? '...' : ''}</td>
-        <td>Anonymous</td>
-        <td>
+        <td data-label="Original joke">${escapeHtml(suggestion.jokes?.title || 'Unknown joke')}</td>
+        <td data-label="Suggested title">${escapeHtml(suggestion.suggested_title || suggestion.jokes?.title || '')}</td>
+        <td data-label="Suggested content">${escapeHtml((suggestion.suggested_content || '').slice(0, 120))}${suggestion.suggested_content && suggestion.suggested_content.length > 120 ? '...' : ''}</td>
+        <td data-label="Suggested by">Anonymous</td>
+        <td data-label="Actions">
           <div class="d-flex flex-wrap gap-2">
             <button class="btn btn-sm btn-success" type="button" data-suggestion-action="approve" data-suggestion-id="${suggestion.id}">Approve</button>
             <button class="btn btn-sm btn-outline-danger" type="button" data-suggestion-action="reject" data-suggestion-id="${suggestion.id}">Reject</button>
@@ -110,17 +110,17 @@ function renderJokesTab(jokes) {
   const rows = jokes.length
     ? jokes.map((joke) => `
       <tr>
-        <td>
+        <td data-label="Joke">
           <div class="d-flex align-items-center gap-3">
             ${joke.imageUrl ? `<img class="admin-joke-thumb" src="${escapeHtml(joke.imageUrl)}" alt="${escapeHtml(joke.title)}" />` : '<div class="admin-joke-thumb admin-joke-thumb-placeholder" aria-hidden="true"></div>'}
             <div><strong>${escapeHtml(joke.title)}</strong><div class="small text-body-secondary">${escapeHtml(joke.content.slice(0, 90))}${joke.content.length > 90 ? '...' : ''}</div></div>
           </div>
         </td>
-        <td>${escapeHtml(joke.category)}</td>
-        <td><a href="${escapeHtml(joke.authorHref)}">${escapeHtml(joke.authorName)}</a></td>
-        <td><span class="badge rounded-pill ${joke.status === 'approved' ? 'text-bg-success' : joke.status === 'rejected' ? 'text-bg-danger' : 'text-bg-warning'}">${escapeHtml(joke.status)}</span></td>
-        <td>${escapeHtml(formatDateTime(joke.createdAt))}</td>
-        <td>
+        <td data-label="Category">${escapeHtml(joke.category)}</td>
+        <td data-label="Author"><a href="${escapeHtml(joke.authorHref)}">${escapeHtml(joke.authorName)}</a></td>
+        <td data-label="Status"><span class="badge rounded-pill ${joke.status === 'approved' ? 'text-bg-success' : joke.status === 'rejected' ? 'text-bg-danger' : 'text-bg-warning'}">${escapeHtml(joke.status)}</span></td>
+        <td data-label="Submitted">${escapeHtml(formatDateTime(joke.createdAt))}</td>
+        <td data-label="Actions">
           <div class="d-flex flex-wrap gap-2">
             <a class="btn btn-sm btn-outline-dark" href="/edit-joke.html?id=${joke.id}">Edit</a>
             <button class="btn btn-sm btn-outline-danger" type="button" data-delete-joke-id="${joke.id}" data-delete-joke-title="${escapeHtml(joke.title)}">Delete</button>
@@ -145,15 +145,15 @@ function renderUsersTab(users) {
       const isAdmin = user.roles.includes('admin')
       return `
         <tr>
-          <td>
+          <td data-label="User">
             <div class="d-flex align-items-center gap-3">
               ${user.avatar_url ? `<img class="admin-user-avatar" src="${escapeHtml(user.avatar_url)}" alt="${escapeHtml(user.username)} avatar" />` : '<div class="admin-user-avatar admin-user-avatar-placeholder" aria-hidden="true"></div>'}
               <div><strong>${escapeHtml(user.display_name || user.username)}</strong><div class="small text-body-secondary">@${escapeHtml(user.username)}</div></div>
             </div>
           </td>
-          <td>${escapeHtml(user.roles.join(', ') || 'user')}</td>
-          <td>${escapeHtml(formatDateTime(user.created_at))}</td>
-          <td>
+          <td data-label="Roles">${escapeHtml(user.roles.join(', ') || 'user')}</td>
+          <td data-label="Created">${escapeHtml(formatDateTime(user.created_at))}</td>
+          <td data-label="Actions">
             <div class="d-flex flex-wrap gap-2">
               <button class="btn btn-sm ${isAdmin ? 'btn-outline-warning' : 'btn-outline-success'}" type="button" data-toggle-admin-user="${user.id}" data-enable-admin="${isAdmin ? 'false' : 'true'}">${isAdmin ? 'Remove admin' : 'Make admin'}</button>
               <button class="btn btn-sm btn-outline-danger" type="button" data-delete-user-id="${user.id}" data-delete-user-name="${escapeHtml(user.display_name || user.username)}">Delete data</button>
@@ -179,10 +179,10 @@ function renderLogsTab(logs) {
   const rows = logs.length
     ? logs.map((log) => `
       <tr>
-        <td>${escapeHtml(formatDateTime(log.created_at))}</td>
-        <td>${escapeHtml(log.profiles?.display_name || log.profiles?.username || log.user_id || 'Unknown user')}</td>
-        <td><span class="badge rounded-pill joke-pill">${escapeHtml(log.action)}</span></td>
-        <td><code class="small">${escapeHtml(JSON.stringify(log.metadata || {}))}</code></td>
+        <td data-label="When">${escapeHtml(formatDateTime(log.created_at))}</td>
+        <td data-label="User">${escapeHtml(log.profiles?.display_name || log.profiles?.username || log.user_id || 'Unknown user')}</td>
+        <td data-label="Action"><span class="badge rounded-pill joke-pill">${escapeHtml(log.action)}</span></td>
+        <td data-label="Metadata"><code class="small">${escapeHtml(JSON.stringify(log.metadata || {}))}</code></td>
       </tr>`).join('')
     : '<tr><td colspan="4" class="text-body-secondary">No activity logs found yet.</td></tr>'
 

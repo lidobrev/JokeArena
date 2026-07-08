@@ -1224,3 +1224,152 @@ a:focus-visible {
   transform: translateY(-2px) scale(1.1);
   filter: drop-shadow(0 8px 10px rgba(248, 181, 0, 0.25));
 }
+
+/* === Release candidate fixes: edit joke images and mobile admin tables === */
+.current-joke-image-panel {
+  padding: 1rem;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.current-joke-image {
+  display: block;
+  width: 100%;
+  max-height: 24rem;
+  object-fit: cover;
+  border-radius: 1.1rem;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.14);
+}
+
+@media (max-width: 575.98px) {
+  .container {
+    padding-inline: 1rem;
+  }
+
+  .py-lg-6,
+  .py-5 {
+    padding-top: 2.25rem !important;
+    padding-bottom: 2.25rem !important;
+  }
+
+  .display-4,
+  .display-5 {
+    font-size: 2.1rem;
+    line-height: 1.08;
+  }
+
+  .lead {
+    font-size: 1rem;
+  }
+
+  .card-body.p-4,
+  .card-body.p-xl-5 {
+    padding: 1.1rem !important;
+  }
+
+  .btn,
+  .btn-lg,
+  .admin-table-card .btn {
+    width: 100%;
+  }
+
+  .admin-tabs {
+    width: 100%;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    border-radius: 1.25rem;
+    justify-content: flex-start;
+    scrollbar-width: thin;
+  }
+
+  .admin-tabs .nav-item {
+    flex: 0 0 auto;
+  }
+
+  .admin-tabs .nav-link {
+    white-space: nowrap;
+  }
+
+  .admin-table-card .table-responsive {
+    overflow: visible;
+  }
+
+  .admin-table-card table,
+  .admin-table-card thead,
+  .admin-table-card tbody,
+  .admin-table-card tr,
+  .admin-table-card th,
+  .admin-table-card td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-table-card thead {
+    display: none;
+  }
+
+  .admin-table-card tbody tr {
+    margin-bottom: 1rem;
+    padding: 0.9rem;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 1.15rem;
+    background: rgba(255, 255, 255, 0.78);
+    box-shadow: 0 14px 34px rgba(15, 23, 42, 0.08);
+  }
+
+  .admin-table-card tbody td {
+    display: grid;
+    grid-template-columns: minmax(7rem, 38%) 1fr;
+    gap: 0.85rem;
+    align-items: start;
+    padding: 0.65rem 0 !important;
+    border: 0 !important;
+    word-break: break-word;
+  }
+
+  .admin-table-card tbody td::before {
+    content: attr(data-label);
+    color: var(--jokearena-muted);
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .admin-table-card tbody td[colspan] {
+    display: block;
+  }
+
+  .admin-table-card tbody td[colspan]::before {
+    content: '';
+    display: none;
+  }
+
+  .admin-table-card .d-flex.flex-wrap.gap-2,
+  .admin-table-card td[data-label="Actions"] > div {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+
+  .admin-joke-thumb,
+  .admin-user-avatar {
+    width: 4rem;
+    height: 4rem;
+  }
+
+  .joke-card-footer,
+  .joke-vote-row,
+  .d-flex.align-items-center.justify-content-between {
+    gap: 0.75rem;
+  }
+
+  .pagination {
+    gap: 0.35rem;
+  }
+
+  .pagination .page-link {
+    margin-inline: 0;
+  }
+}
