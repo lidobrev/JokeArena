@@ -2,12 +2,9 @@ const navItems = [
   { label: 'Home', href: '/index.html', pageId: 'home' },
   { label: 'Login', href: '/login.html', pageId: 'login' },
   { label: 'Register', href: '/register.html', pageId: 'register' },
-  { label: 'Add Joke', href: '/add-joke.html', pageId: 'add-joke' },
-  { label: 'Details', href: '/joke-details.html', pageId: 'joke-details' },
-  { label: 'Edit Joke', href: '/edit-joke.html', pageId: 'edit-joke' },
-  { label: 'Profile', href: '/profile.html', pageId: 'profile' },
-  { label: 'Admin', href: '/admin.html', pageId: 'admin' },
 ]
+
+// TODO: Add authenticated navigation after Supabase authentication is implemented.
 
 export function renderNavbar(activePageId = 'home') {
   return `
