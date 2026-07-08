@@ -19,10 +19,10 @@ function buildMainHtml(messageHtml = '') {
             <div class="card form-card border-0 shadow-lg">
               <div class="card-body p-4 p-xl-5">
                 <h2 class="h3 fw-bold mb-2">Create Account</h2>
-                <p class="text-body-secondary mb-4">Set up your Comedy Club identity for future use.</p>
+                <p class="text-body-secondary mb-4">Set up your public JokeArena identity.</p>
                 ${messageHtml}
                 <form id="register-form" novalidate>
-                  ${renderFormField({ label: 'Username', type: 'text', name: 'username', placeholder: 'Your display name' })}
+                  ${renderFormField({ label: 'Display name', type: 'text', name: 'displayName', placeholder: 'Your public name' })}
                   ${renderFormField({ label: 'Email', type: 'email', name: 'email', placeholder: 'you@example.com' })}
                   ${renderFormField({ label: 'Password', type: 'password', name: 'password', placeholder: 'Create a password' })}
                   ${renderFormField({ label: 'Confirm Password', type: 'password', name: 'confirm-password', placeholder: 'Repeat your password' })}
@@ -59,14 +59,14 @@ async function boot() {
     event.preventDefault()
 
     const formData = new FormData(form)
-    const username = String(formData.get('username') ?? '').trim()
+    const displayName = String(formData.get('displayName') ?? '').trim()
     const email = String(formData.get('email') ?? '').trim()
     const password = String(formData.get('password') ?? '')
     const confirmPassword = String(formData.get('confirm-password') ?? '')
 
     cardBody.querySelector('.alert')?.remove()
 
-    if (!username || !email || !password || !confirmPassword) {
+    if (!displayName || !email || !password || !confirmPassword) {
       cardBody.insertAdjacentHTML('afterbegin', '<div class="alert alert-danger" role="alert">Please fill in all fields.</div>')
       return
     }
@@ -80,7 +80,7 @@ async function boot() {
       const submitButton = form.querySelector('button[type="submit"]')
       submitButton.disabled = true
       submitButton.textContent = 'Creating account...'
-      const response = await signUpWithEmail({ email, password, username })
+      const response = await signUpWithEmail({ email, password, displayName })
 
       if (response.session) {
         window.location.assign('/index.html')

@@ -15,6 +15,8 @@ export default defineConfig({
         admin: resolve(__dirname, 'admin.html'),
         latestJokes: resolve(__dirname, 'latest-jokes.html'),
         topRated: resolve(__dirname, 'top-rated.html'),
+        categoryJokes: resolve(__dirname, 'category-jokes.html'),
+        creators: resolve(__dirname, 'creators.html'),
       },
     },
   },

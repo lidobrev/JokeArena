@@ -147,8 +147,8 @@ function renderUsersTab(users) {
         <tr>
           <td data-label="User">
             <div class="d-flex align-items-center gap-3">
-              ${user.avatar_url ? `<img class="admin-user-avatar" src="${escapeHtml(user.avatar_url)}" alt="${escapeHtml(user.username)} avatar" />` : '<div class="admin-user-avatar admin-user-avatar-placeholder" aria-hidden="true"></div>'}
-              <div><strong>${escapeHtml(user.display_name || user.username)}</strong><div class="small text-body-secondary">@${escapeHtml(user.username)}</div></div>
+              ${user.avatar_url ? `<img class="admin-user-avatar" src="${escapeHtml(user.avatar_url)}" alt="${escapeHtml(user.display_name || 'User')} avatar" />` : '<div class="admin-user-avatar admin-user-avatar-placeholder" aria-hidden="true"></div>'}
+              <div><strong>${escapeHtml(user.display_name || 'JokeArena user')}</strong><div class="small text-body-secondary">User profile</div></div>
             </div>
           </td>
           <td data-label="Roles">${escapeHtml(user.roles.join(', ') || 'user')}</td>
@@ -156,7 +156,7 @@ function renderUsersTab(users) {
           <td data-label="Actions">
             <div class="d-flex flex-wrap gap-2">
               <button class="btn btn-sm ${isAdmin ? 'btn-outline-warning' : 'btn-outline-success'}" type="button" data-toggle-admin-user="${user.id}" data-enable-admin="${isAdmin ? 'false' : 'true'}">${isAdmin ? 'Remove admin' : 'Make admin'}</button>
-              <button class="btn btn-sm btn-outline-danger" type="button" data-delete-user-id="${user.id}" data-delete-user-name="${escapeHtml(user.display_name || user.username)}">Delete data</button>
+              <button class="btn btn-sm btn-outline-danger" type="button" data-delete-user-id="${user.id}" data-delete-user-name="${escapeHtml(user.display_name || 'this user')}">Delete data</button>
             </div>
           </td>
         </tr>
@@ -180,7 +180,7 @@ function renderLogsTab(logs) {
     ? logs.map((log) => `
       <tr>
         <td data-label="When">${escapeHtml(formatDateTime(log.created_at))}</td>
-        <td data-label="User">${escapeHtml(log.profiles?.display_name || log.profiles?.username || log.user_id || 'Unknown user')}</td>
+        <td data-label="User">${escapeHtml(log.profiles?.display_name || log.user_id || 'Unknown user')}</td>
         <td data-label="Action"><span class="badge rounded-pill joke-pill">${escapeHtml(log.action)}</span></td>
         <td data-label="Metadata"><code class="small">${escapeHtml(JSON.stringify(log.metadata || {}))}</code></td>
       </tr>`).join('')

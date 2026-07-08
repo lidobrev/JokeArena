@@ -34,7 +34,7 @@ export async function logActivity(action, metadata = {}) {
 export async function fetchActivityLogs({ limit = 100 } = {}) {
   const { data, error } = await supabase
     .from('activity_logs')
-    .select('id, user_id, action, metadata, created_at, profiles(username, display_name)')
+    .select('id, user_id, action, metadata, created_at, profiles(display_name)')
     .order('created_at', { ascending: false })
     .limit(limit)
 

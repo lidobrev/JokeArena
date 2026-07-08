@@ -186,3 +186,64 @@ export function renderModerationRow({ type, item, status, reportedBy, updatedAt 
     </tr>
   `
 }
+
+
+export function renderCategorySlider(categories = []) {
+  if (!categories.length) {
+    return ''
+  }
+
+  return `
+    <section class="py-4 border-top border-opacity-10">
+      <div class="container">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+          <div>
+            <p class="text-uppercase small fw-semibold text-body-secondary mb-1">Browse by topic</p>
+            <h2 class="h4 fw-bold mb-0">Joke Categories</h2>
+          </div>
+        </div>
+        <div class="category-slider" aria-label="Joke categories">
+          ${categories.map((category) => `
+            <a class="category-chip" href="/category-jokes.html?category=${escapeHtml(category.slug)}">
+              <span>${escapeHtml(category.name)}</span>
+              <small>View jokes</small>
+            </a>
+          `).join('')}
+        </div>
+      </div>
+    </section>
+  `
+}
+
+export function renderSeeMoreButton(href, label = 'See more') {
+  return `
+    <div class="see-more-wrap">
+      <a class="btn btn-warning btn-lg see-more-button" href="${escapeHtml(href)}">${escapeHtml(label)}</a>
+    </div>
+  `
+}
+
+export function renderCreatorCard(creator) {
+  const displayName = creator.displayName || creator.display_name || 'JokeArena creator'
+  const avatar = creator.avatar_url
+    ? `<img class="creator-avatar" src="${escapeHtml(creator.avatar_url)}" alt="${escapeHtml(displayName)} avatar" loading="lazy" />`
+    : `<div class="creator-avatar creator-avatar-placeholder">${escapeHtml((displayName || 'JA').split(/\s+/).slice(0, 2).map((part) => part.charAt(0).toUpperCase()).join('') || 'JA')}</div>`
+
+  return `
+    <div class="col-sm-6 col-lg-3">
+      <a class="creator-card" href="${escapeHtml(creator.href || `/profile.html?id=${creator.id}`)}">
+        ${avatar}
+        <strong>${escapeHtml(displayName)}</strong>
+        <span>${escapeHtml(creator.jokeCount ?? 0)} published jokes</span>
+      </a>
+    </div>
+  `
+}
+
+export function renderCreatorsGrid(creators = []) {
+  if (!creators.length) {
+    return '<div class="alert alert-info mb-0" role="alert">No joke creators to show yet.</div>'
+  }
+
+  return `<div class="row g-4">${creators.map(renderCreatorCard).join('')}</div>`
+}

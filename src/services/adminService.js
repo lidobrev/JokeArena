@@ -5,7 +5,7 @@ import { logActivity } from './activityService.js'
 export async function fetchAdminProfiles() {
   const { data: profiles, error: profileError } = await supabase
     .from('profiles')
-    .select('id, username, display_name, avatar_url, created_at, updated_at')
+    .select('id, display_name, avatar_url, created_at, updated_at')
     .order('created_at', { ascending: false })
 
   if (profileError) {

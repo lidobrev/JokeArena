@@ -1,5 +1,5 @@
-import { bindLogoutButton, getAuthState, updateUserEmail } from '../services/authService.js'
-import { fetchProfileByUserId, fetchProfileJokes, updateProfile, uploadAvatar } from '../services/profileService.js'
+import { bindLogoutButton, getAuthState } from '../services/authService.js'
+import { fetchProfileByUserId, fetchProfileJokes, removeAvatar, updateProfile, uploadAvatar } from '../services/profileService.js'
 import { escapeHtml, initialsFromName, setDocumentTitle } from '../utils/dom.js'
 import { renderFormField, renderMiniJokeCard, renderPageShell } from '../utils/page-layout.js'
 
@@ -33,6 +33,11 @@ function renderJokeSection(title, jokes, emptyText) {
 }
 
 function renderEditForm(profile, authState) {
+  const email = authState.user?.email || ''
+  const removeButton = profile.avatar_url
+    ? '<button class="btn btn-outline-danger btn-lg" type="button" data-remove-avatar>Delete Avatar</button>'
+    : ''
+
   return `
     <div class="card profile-card border-0 shadow-sm mb-4">
       <div class="card-body p-4 p-xl-5">
@@ -44,12 +49,17 @@ function renderEditForm(profile, authState) {
           <span class="badge rounded-pill joke-pill">Supabase Storage avatar</span>
         </div>
         <form id="profile-edit-form" novalidate>
-          ${renderFormField({ label: 'Display name', name: 'display_name', placeholder: 'Your public name', value: profile.display_name || profile.username || '' })}
-          ${renderFormField({ label: 'Username', name: 'username', placeholder: 'username', value: profile.username || '' })}
-          ${renderFormField({ label: 'Email', type: 'email', name: 'email', placeholder: 'you@example.com', value: authState.user.email || '' })}
+          ${renderFormField({ label: 'Display name', name: 'display_name', placeholder: 'Your public name', value: profile.display_name || '' })}
+          <div class="mb-3">
+            <label class="form-label fw-semibold" for="profile-email">Email</label>
+            <input class="form-control form-control-lg" id="profile-email" type="email" value="${escapeHtml(email)}" readonly />
+            <p class="form-text mb-0">Email is managed by Supabase Auth and cannot be changed from this profile page.</p>
+          </div>
           ${renderFormField({ label: 'Avatar image', type: 'file', name: 'avatar' })}
-          <div class="alert alert-info" role="alert">Changing email may require confirmation depending on your Supabase Auth settings.</div>
-          <button class="btn btn-warning btn-lg" type="submit">Save Profile</button>
+          <div class="d-flex flex-column flex-sm-row gap-3">
+            <button class="btn btn-warning btn-lg" type="submit">Save Profile</button>
+            ${removeButton}
+          </div>
         </form>
       </div>
     </div>
@@ -57,7 +67,7 @@ function renderEditForm(profile, authState) {
 }
 
 function buildMainHtml(profile, allJokes, authState, isOwnProfile, messageHtml = '') {
-  const displayName = profile.display_name || profile.username || 'JokeArena user'
+  const displayName = profile.display_name || 'JokeArena user'
   const publishedJokes = allJokes.filter((joke) => joke.status === 'approved')
   const pendingJokes = allJokes.filter((joke) => joke.status === 'pending')
 
@@ -71,7 +81,7 @@ function buildMainHtml(profile, allJokes, authState, isOwnProfile, messageHtml =
               <div class="card-body p-4 p-xl-5 text-center">
                 ${renderAvatar(profile, displayName)}
                 <h1 class="h3 fw-bold mb-2">${escapeHtml(displayName)}</h1>
-                <p class="text-body-secondary mb-3">@${escapeHtml(profile.username || 'user')}</p>
+                ${isOwnProfile ? `<p class="text-body-secondary mb-3">${escapeHtml(authState.user.email || '')}</p>` : ''}
                 <p class="small text-body-secondary mb-0">Joined ${escapeHtml(new Intl.DateTimeFormat('en', { dateStyle: 'medium' }).format(new Date(profile.created_at || Date.now())))}</p>
               </div>
             </div>
@@ -79,7 +89,7 @@ function buildMainHtml(profile, allJokes, authState, isOwnProfile, messageHtml =
 
           <div class="col-lg-8">
             ${isOwnProfile ? renderEditForm(profile, authState) : ''}
-            ${renderJokeSection('Published jokes', publishedJokes, isOwnProfile ? 'You do not have approved jokes yet.' : 'This user does not have approved jokes yet.')}
+            ${renderJokeSection('Published jokes', publishedJokes, isOwnProfile ? 'You do not have approved jokes yet.' : 'This creator does not have approved jokes yet.')}
             ${isOwnProfile ? renderJokeSection('Pending jokes', pendingJokes, 'You do not have pending jokes right now.') : ''}
             ${isOwnProfile ? '<a class="btn btn-warning" href="/create-joke.html">Create joke</a>' : ''}
           </div>
@@ -124,18 +134,28 @@ async function boot() {
   const form = document.querySelector('#profile-edit-form')
   const cardBody = form.parentElement
 
+  document.querySelector('[data-remove-avatar]')?.addEventListener('click', async () => {
+    if (!window.confirm('Delete your current avatar?')) return
+
+    try {
+      await removeAvatar(authState.user.id, profile.avatar_url)
+      window.location.assign('/profile.html')
+    } catch (error) {
+      cardBody.querySelector('.alert-danger, .alert-success')?.remove()
+      cardBody.insertAdjacentHTML('afterbegin', `<div class="alert alert-danger" role="alert">${escapeHtml(error instanceof Error ? error.message : 'Unable to delete avatar.')}</div>`)
+    }
+  })
+
   form.addEventListener('submit', async (event) => {
     event.preventDefault()
     cardBody.querySelector('.alert-danger, .alert-success')?.remove()
 
     const formData = new FormData(form)
     const displayName = String(formData.get('display_name') ?? '').trim()
-    const username = String(formData.get('username') ?? '').trim()
-    const email = String(formData.get('email') ?? '').trim()
     const avatarFile = formData.get('avatar')
 
-    if (!displayName || !username || !email) {
-      cardBody.insertAdjacentHTML('afterbegin', '<div class="alert alert-danger" role="alert">Display name, username and email are required.</div>')
+    if (!displayName) {
+      cardBody.insertAdjacentHTML('afterbegin', '<div class="alert alert-danger" role="alert">Display name is required.</div>')
       return
     }
 
@@ -146,18 +166,13 @@ async function boot() {
 
       let avatarUrl = profile.avatar_url
       if (avatarFile instanceof File && avatarFile.size > 0) {
-        avatarUrl = await uploadAvatar(avatarFile, authState.user.id)
+        avatarUrl = await uploadAvatar(avatarFile, authState.user.id, profile.avatar_url)
       }
 
       await updateProfile(authState.user.id, {
         display_name: displayName,
-        username,
         avatar_url: avatarUrl,
       })
-
-      if (email !== authState.user.email) {
-        await updateUserEmail(email)
-      }
 
       cardBody.insertAdjacentHTML('afterbegin', '<div class="alert alert-success" role="alert">Profile updated successfully.</div>')
       setTimeout(() => window.location.assign('/profile.html'), 900)

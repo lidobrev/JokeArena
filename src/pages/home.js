@@ -1,10 +1,11 @@
 import { bindLogoutButton, getAuthState } from '../services/authService.js'
-import { fetchApprovedJokes, fetchTopRatedJokes } from '../services/jokeService.js'
+import { fetchApprovedJokes, fetchCategories, fetchTopRatedJokes } from '../services/jokeService.js'
+import { fetchCreators } from '../services/profileService.js'
 import { rateJoke } from '../services/ratingService.js'
 import { escapeHtml, setDocumentTitle } from '../utils/dom.js'
-import { renderJokeGrid, renderPageShell, renderStatCard } from '../utils/page-layout.js'
+import { renderCategorySlider, renderCreatorsGrid, renderJokeGrid, renderPageShell, renderSeeMoreButton, renderStatCard } from '../utils/page-layout.js'
 
-function buildMainHtml(authState, latestJokes, topRatedJokes) {
+function buildMainHtml(authState, categories, latestJokes, topRatedJokes, creators) {
   const allPreviewJokes = [...latestJokes, ...topRatedJokes]
   const totalVotes = allPreviewJokes.reduce((sum, joke) => sum + joke.ratingCount, 0)
   const weightedRating = allPreviewJokes.reduce((sum, joke) => sum + joke.ratingAverage * joke.ratingCount, 0)
@@ -40,6 +41,8 @@ function buildMainHtml(authState, latestJokes, topRatedJokes) {
       </div>
     </section>
 
+    ${renderCategorySlider(categories)}
+
     <section class="py-4 py-lg-5 border-top border-opacity-10">
       <div class="container">
         <div class="row g-3">
@@ -57,9 +60,9 @@ function buildMainHtml(authState, latestJokes, topRatedJokes) {
             <p class="text-uppercase small fw-semibold text-body-secondary mb-1">Newest approved jokes</p>
             <h2 class="h3 mb-0">Latest Jokes</h2>
           </div>
-          <a class="btn btn-outline-dark" href="/latest-jokes.html">View all latest</a>
         </div>
         ${renderJokeGrid(latestJokes)}
+        ${renderSeeMoreButton('/latest-jokes.html', 'See more latest jokes')}
       </div>
     </section>
 
@@ -70,9 +73,22 @@ function buildMainHtml(authState, latestJokes, topRatedJokes) {
             <p class="text-uppercase small fw-semibold text-body-secondary mb-1">Audience favorites</p>
             <h2 class="h3 mb-0">Top Rated Jokes</h2>
           </div>
-          <a class="btn btn-outline-dark" href="/top-rated.html">View all top rated</a>
         </div>
         ${renderJokeGrid(topRatedJokes)}
+        ${renderSeeMoreButton('/top-rated.html', 'See more top rated jokes')}
+      </div>
+    </section>
+
+    <section class="py-5 py-lg-6 border-top border-opacity-10">
+      <div class="container">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+          <div>
+            <p class="text-uppercase small fw-semibold text-body-secondary mb-1">Community</p>
+            <h2 class="h3 mb-0">Joke Creators</h2>
+          </div>
+        </div>
+        ${renderCreatorsGrid(creators)}
+        ${renderSeeMoreButton('/creators.html', 'See all creators')}
       </div>
     </section>
   `
@@ -108,13 +124,15 @@ function bindListRatings(authState) {
 async function boot() {
   setDocumentTitle('Home')
 
-  const [authState, latestJokes, topRatedJokes] = await Promise.all([
+  const [authState, categories, latestJokes, topRatedJokes, creators] = await Promise.all([
     getAuthState(),
+    fetchCategories(),
     fetchApprovedJokes({ limit: 9 }),
     fetchTopRatedJokes({ limit: 9 }),
+    fetchCreators({ limit: 4 }).catch(() => []),
   ])
 
-  document.querySelector('#app').innerHTML = renderPageShell('home', buildMainHtml(authState, latestJokes, topRatedJokes), authState)
+  document.querySelector('#app').innerHTML = renderPageShell('home', buildMainHtml(authState, categories, latestJokes, topRatedJokes, creators), authState)
   bindLogoutButton()
   bindListRatings(authState)
 }

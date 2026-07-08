@@ -8,7 +8,7 @@ function normalizeJoke(joke, ratingSummaries = new Map()) {
   const summary = ratingSummaries.get(joke.id) ?? { count: 0, average: 0 }
   const category = joke.joke_categories?.name ?? 'Uncategorized'
   const categorySlug = joke.joke_categories?.slug ?? 'random'
-  const authorName = joke.profiles?.display_name || joke.profiles?.username || 'JokeArena'
+  const authorName = joke.profiles?.display_name || 'JokeArena creator'
 
   return {
     id: joke.id,
@@ -77,6 +77,53 @@ export async function fetchApprovedJokesCount() {
     .from('jokes')
     .select('id', { count: 'exact', head: true })
     .eq('status', 'approved')
+
+  if (error) {
+    throw error
+  }
+
+  return count ?? 0
+}
+
+
+export async function fetchCategoryBySlug(slug) {
+  const { data, error } = await supabase
+    .from('joke_categories')
+    .select('id, name, slug, description')
+    .eq('slug', slug)
+    .maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  return data
+}
+
+export async function fetchApprovedJokesByCategorySlug(slug, { limit, page = 1, pageSize } = {}) {
+  let query = supabase
+    .from('jokes')
+    .select('id, title, content, image_url, status, created_at, updated_at, author_id, category_id, joke_categories!inner(name, slug), profiles(display_name, username)')
+    .eq('status', 'approved')
+    .eq('joke_categories.slug', slug)
+    .order('created_at', { ascending: false })
+
+  if (pageSize) {
+    const from = Math.max(0, (page - 1) * pageSize)
+    query = query.range(from, from + pageSize - 1)
+  } else if (limit) {
+    query = query.limit(limit)
+  }
+
+  return fetchJokesWithRatings(query)
+}
+
+export async function fetchApprovedJokesByCategoryCount(slug) {
+  const { count, error } = await supabase
+    .from('jokes')
+    .select('id, joke_categories!inner(slug)', { count: 'exact', head: true })
+    .eq('status', 'approved')
+    .eq('joke_categories.slug', slug)
 
   if (error) {
     throw error
