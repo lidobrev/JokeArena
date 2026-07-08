@@ -8,9 +8,12 @@ const navItems = [
 
 export function renderNavbar(activePageId = 'home') {
   return `
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark border-bottom border-dark sticky-top">
+    <nav class="navbar navbar-expand-lg navbar-dark joke-navbar sticky-top shadow-sm">
       <div class="container">
-        <a class="navbar-brand fw-bold letter-spacing-wide" href="/index.html">JokeArena</a>
+        <a class="navbar-brand fw-bold letter-spacing-wide d-flex align-items-center gap-2" href="/index.html">
+          <span class="brand-mark">🤡</span>
+          <span>JokeArena</span>
+        </a>
         <button
           class="navbar-toggler"
           type="button"
@@ -29,7 +32,7 @@ export function renderNavbar(activePageId = 'home') {
                 (item) => `
                   <li class="nav-item">
                     <a
-                      class="nav-link${item.pageId === activePageId ? ' active' : ''}"
+                      class="nav-link nav-pill${item.pageId === activePageId ? ' active' : ''}"
                       ${item.pageId === activePageId ? 'aria-current="page"' : ''}
                       href="${item.href}"
                     >
