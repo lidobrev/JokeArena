@@ -117,3 +117,124 @@ export async function setUserRole(userId, role, enabled) {
 
   await logActivity('admin_update_user_role', { user_id: userId, role, enabled })
 }
+
+
+export async function fetchAdminCategories() {
+  const { data: categories, error: categoryError } = await supabase
+    .from('joke_categories')
+    .select('id, name, slug, description, created_at')
+    .order('name', { ascending: true })
+
+  if (categoryError) {
+    throw categoryError
+  }
+
+  const { data: jokes, error: jokesError } = await supabase
+    .from('jokes')
+    .select('category_id')
+
+  if (jokesError) {
+    throw jokesError
+  }
+
+  const counts = new Map()
+  for (const joke of jokes ?? []) {
+    counts.set(joke.category_id, (counts.get(joke.category_id) ?? 0) + 1)
+  }
+
+  return (categories ?? []).map((category) => ({
+    ...category,
+    jokeCount: counts.get(category.id) ?? 0,
+  }))
+}
+
+export function slugifyCategory(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+export async function createCategory({ name, slug, description }) {
+  const cleanName = String(name || '').trim()
+  const cleanSlug = slugifyCategory(slug || cleanName)
+
+  if (!cleanName || !cleanSlug) {
+    throw new Error('Category name and slug are required.')
+  }
+
+  const { data, error } = await supabase
+    .from('joke_categories')
+    .insert({
+      name: cleanName,
+      slug: cleanSlug,
+      description: String(description || '').trim() || null,
+    })
+    .select('id, name, slug, description')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  await logActivity('admin_create_category', { category_id: data.id, name: data.name })
+  return data
+}
+
+export async function updateCategory(categoryId, { name, slug, description }) {
+  const cleanName = String(name || '').trim()
+  const cleanSlug = slugifyCategory(slug || cleanName)
+
+  if (!categoryId || !cleanName || !cleanSlug) {
+    throw new Error('Category id, name and slug are required.')
+  }
+
+  const { data, error } = await supabase
+    .from('joke_categories')
+    .update({
+      name: cleanName,
+      slug: cleanSlug,
+      description: String(description || '').trim() || null,
+    })
+    .eq('id', categoryId)
+    .select('id, name, slug, description')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  await logActivity('admin_update_category', { category_id: data.id, name: data.name })
+  return data
+}
+
+export async function deleteCategory(categoryId) {
+  if (!categoryId) {
+    throw new Error('Missing category id.')
+  }
+
+  const { count, error: countError } = await supabase
+    .from('jokes')
+    .select('id', { count: 'exact', head: true })
+    .eq('category_id', categoryId)
+
+  if (countError) {
+    throw countError
+  }
+
+  if ((count ?? 0) > 0) {
+    throw new Error('This category has jokes. Move or delete those jokes before deleting the category.')
+  }
+
+  const { error } = await supabase
+    .from('joke_categories')
+    .delete()
+    .eq('id', categoryId)
+
+  if (error) {
+    throw error
+  }
+
+  await logActivity('admin_delete_category', { category_id: categoryId })
+}

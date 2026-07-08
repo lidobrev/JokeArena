@@ -4,22 +4,14 @@ import { renderFormField, renderPageShell } from '../utils/page-layout.js'
 
 function buildMainHtml(messageHtml = '') {
   return `
-    <section class="py-5 py-lg-6">
+    <section class="auth-page py-5 py-lg-6">
       <div class="container">
-        <div class="row justify-content-center align-items-center g-4">
-          <div class="col-lg-5">
-            <div class="auth-illustration p-4 p-xl-5 rounded-4 h-100">
-              <span class="display-5">🔐</span>
-              <h1 class="h2 fw-bold mt-3 mb-3">Welcome back to JokeArena</h1>
-              <p class="text-body-secondary mb-0">Sign in to vote, publish jokes, and manage your profile.</p>
-            </div>
-          </div>
-
-          <div class="col-lg-6">
+        <div class="row justify-content-center">
+          <div class="col-sm-10 col-md-8 col-lg-5">
             <div class="card form-card border-0 shadow-lg">
               <div class="card-body p-4 p-xl-5">
-                <h2 class="h3 fw-bold mb-2">Login</h2>
-                <p class="text-body-secondary mb-4">Use your JokeArena account to join the comedy battle.</p>
+                <h1 class="h3 fw-bold mb-2 text-center">Login</h1>
+                <p class="text-body-secondary mb-4 text-center">Sign in to continue.</p>
                 ${messageHtml}
                 <form id="login-form" novalidate>
                   ${renderFormField({ label: 'Email', type: 'email', name: 'email', placeholder: 'you@example.com' })}
@@ -38,6 +30,7 @@ function buildMainHtml(messageHtml = '') {
     </section>
   `
 }
+
 
 async function boot() {
   setDocumentTitle('Login')

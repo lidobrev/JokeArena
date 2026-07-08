@@ -1,6 +1,6 @@
 import { bindLogoutButton, getAuthState } from '../services/authService.js'
 import { fetchActivityLogs } from '../services/activityService.js'
-import { deleteUserAppData, fetchAdminProfiles, setUserRole } from '../services/adminService.js'
+import { createCategory, deleteCategory, deleteUserAppData, fetchAdminCategories, fetchAdminProfiles, setUserRole, updateCategory } from '../services/adminService.js'
 import {
   deleteJokeById,
   fetchAllJokesForAdmin,
@@ -23,6 +23,7 @@ function renderAdminTabs(activeTab) {
     ['dashboard', 'Dashboard'],
     ['jokes', 'Jokes'],
     ['users', 'Users'],
+    ['categories', 'Categories'],
     ['logs', 'Log'],
   ]
 
@@ -47,7 +48,7 @@ function renderDashboard(pendingJokes) {
       <tr>
         <td data-label="Item">
           <div class="d-flex align-items-center gap-3">
-            ${joke.imageUrl ? `<img class="admin-joke-thumb" src="${escapeHtml(joke.imageUrl)}" alt="${escapeHtml(joke.title)}" />` : '<div class="admin-joke-thumb admin-joke-thumb-placeholder" aria-hidden="true"></div>'}
+            ${joke.imageUrl ? `<img class="admin-joke-thumb" src="${escapeHtml(joke.imageUrl)}" alt="${escapeHtml(joke.title)}" />` : ''}
             <span>${escapeHtml(joke.title)}</span>
           </div>
         </td>
@@ -84,7 +85,7 @@ function renderJokesTab(jokes) {
       <tr>
         <td data-label="Joke">
           <div class="d-flex align-items-center gap-3">
-            ${joke.imageUrl ? `<img class="admin-joke-thumb" src="${escapeHtml(joke.imageUrl)}" alt="${escapeHtml(joke.title)}" />` : '<div class="admin-joke-thumb admin-joke-thumb-placeholder" aria-hidden="true"></div>'}
+            ${joke.imageUrl ? `<img class="admin-joke-thumb" src="${escapeHtml(joke.imageUrl)}" alt="${escapeHtml(joke.title)}" />` : ''}
             <div><strong>${escapeHtml(joke.title)}</strong><div class="small text-body-secondary">${escapeHtml(joke.content.slice(0, 90))}${joke.content.length > 90 ? '...' : ''}</div></div>
           </div>
         </td>
@@ -147,6 +148,66 @@ function renderUsersTab(users) {
   `
 }
 
+
+function renderCategoriesTab(categories) {
+  const rows = categories.length
+    ? categories.map((category) => `
+      <tr>
+        <td data-label="Name"><strong>${escapeHtml(category.name)}</strong></td>
+        <td data-label="Slug"><code>${escapeHtml(category.slug)}</code></td>
+        <td data-label="Description">${escapeHtml(category.description || '—')}</td>
+        <td data-label="Jokes">${escapeHtml(category.jokeCount)}</td>
+        <td data-label="Actions">
+          <div class="d-flex flex-wrap gap-2">
+            <button
+              class="btn btn-sm btn-outline-dark"
+              type="button"
+              data-edit-category-id="${category.id}"
+              data-edit-category-name="${escapeHtml(category.name)}"
+              data-edit-category-slug="${escapeHtml(category.slug)}"
+              data-edit-category-description="${escapeHtml(category.description || '')}"
+            >Edit</button>
+            <button class="btn btn-sm btn-outline-danger" type="button" data-delete-category-id="${category.id}" data-delete-category-name="${escapeHtml(category.name)}" data-category-joke-count="${category.jokeCount}">Delete</button>
+          </div>
+        </td>
+      </tr>`).join('')
+    : '<tr><td colspan="5" class="text-body-secondary">No categories found.</td></tr>'
+
+  return `
+    <div class="card admin-table-card border-0 shadow-sm mb-4">
+      <div class="card-body p-4 p-xl-5">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+          <div><p class="text-uppercase small fw-semibold text-body-secondary mb-1">Taxonomy</p><h2 class="h4 fw-bold mb-0">Categories</h2></div>
+          <span class="badge rounded-pill joke-pill">Add and edit</span>
+        </div>
+        <form id="category-form" class="admin-category-form mb-4">
+          <input type="hidden" name="categoryId" />
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label class="form-label fw-semibold" for="category-name">Name</label>
+              <input class="form-control" id="category-name" name="name" placeholder="Animals" required />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold" for="category-slug">Slug</label>
+              <input class="form-control" id="category-slug" name="slug" placeholder="animals" required />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold" for="category-description">Description</label>
+              <input class="form-control" id="category-description" name="description" placeholder="Short description" />
+            </div>
+            <div class="col-md-2 d-grid gap-2">
+              <button class="btn btn-warning" type="submit" data-category-submit>Save</button>
+              <button class="btn btn-outline-dark d-none" type="button" data-category-cancel>Cancel</button>
+            </div>
+          </div>
+          <div class="form-text mt-2">Slug is used for category URLs. Example: <code>animals</code>.</div>
+        </form>
+        <div class="table-responsive"><table class="table align-middle mb-0"><thead><tr><th>Name</th><th>Slug</th><th>Description</th><th>Jokes</th><th>Actions</th></tr></thead><tbody>${rows}</tbody></table></div>
+      </div>
+    </div>
+  `
+}
+
 function renderLogsTab(logs) {
   const rows = logs.length
     ? logs.map((log) => `
@@ -191,6 +252,10 @@ async function getTabContent(activeTab) {
 
   if (activeTab === 'users') {
     return renderUsersTab(await fetchAdminProfiles())
+  }
+
+  if (activeTab === 'categories') {
+    return renderCategoriesTab(await fetchAdminCategories())
   }
 
   if (activeTab === 'logs') {
@@ -255,6 +320,81 @@ function bindAdminActions() {
         window.location.reload()
       } catch (error) {
         window.alert(error instanceof Error ? error.message : 'Unable to update the user role right now.')
+        button.disabled = false
+      }
+    })
+  })
+
+  const categoryForm = document.querySelector('#category-form')
+  if (categoryForm) {
+    const cancelButton = categoryForm.querySelector('[data-category-cancel]')
+    const submitButton = categoryForm.querySelector('[data-category-submit]')
+    const resetForm = () => {
+      categoryForm.reset()
+      categoryForm.elements.categoryId.value = ''
+      submitButton.textContent = 'Save'
+      cancelButton.classList.add('d-none')
+    }
+
+    categoryForm.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      const formData = new FormData(categoryForm)
+      const categoryId = String(formData.get('categoryId') || '').trim()
+      const payload = {
+        name: String(formData.get('name') || '').trim(),
+        slug: String(formData.get('slug') || '').trim(),
+        description: String(formData.get('description') || '').trim(),
+      }
+
+      try {
+        submitButton.disabled = true
+        if (categoryId) {
+          await updateCategory(categoryId, payload)
+        } else {
+          await createCategory(payload)
+        }
+        window.location.assign('/admin.html?tab=categories')
+      } catch (error) {
+        window.alert(error instanceof Error ? error.message : 'Unable to save category right now.')
+        submitButton.disabled = false
+      }
+    })
+
+    cancelButton.addEventListener('click', resetForm)
+  }
+
+  document.querySelectorAll('[data-edit-category-id]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const categoryForm = document.querySelector('#category-form')
+      if (!categoryForm) return
+      categoryForm.elements.categoryId.value = button.dataset.editCategoryId || ''
+      categoryForm.elements.name.value = button.dataset.editCategoryName || ''
+      categoryForm.elements.slug.value = button.dataset.editCategorySlug || ''
+      categoryForm.elements.description.value = button.dataset.editCategoryDescription || ''
+      categoryForm.querySelector('[data-category-submit]').textContent = 'Update'
+      categoryForm.querySelector('[data-category-cancel]').classList.remove('d-none')
+      categoryForm.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    })
+  })
+
+  document.querySelectorAll('[data-delete-category-id]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      const name = button.dataset.deleteCategoryName || 'this category'
+      const jokeCount = Number(button.dataset.categoryJokeCount || 0)
+      const message = jokeCount > 0
+        ? `Cannot safely delete "${name}" because it has ${jokeCount} jokes. Move or delete those jokes first.`
+        : `Delete category "${name}"?`
+      if (jokeCount > 0) {
+        window.alert(message)
+        return
+      }
+      if (!window.confirm(message)) return
+      try {
+        button.disabled = true
+        await deleteCategory(button.dataset.deleteCategoryId)
+        window.location.assign('/admin.html?tab=categories')
+      } catch (error) {
+        window.alert(error instanceof Error ? error.message : 'Unable to delete category right now.')
         button.disabled = false
       }
     })

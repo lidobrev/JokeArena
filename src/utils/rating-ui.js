@@ -1,11 +1,20 @@
 import { fetchRatingSummaries, rateJoke } from '../services/ratingService.js'
 
-function setStars(container, rating) {
+function setStars(container, rating, className = 'active') {
   container.querySelectorAll('.rating-star').forEach((star) => {
     const starRating = Number(star.dataset.rating)
-    star.classList.toggle('active', starRating <= rating)
+    star.classList.toggle(className, starRating <= rating)
     star.disabled = false
   })
+}
+
+function clearHoverStars(container) {
+  container.querySelectorAll('.rating-star.hovered').forEach((star) => star.classList.remove('hovered'))
+}
+
+function setHoverStars(container, rating) {
+  clearHoverStars(container)
+  setStars(container, rating, 'hovered')
 }
 
 function setLoading(container, loading) {
@@ -24,44 +33,65 @@ function showMessage(container, message, type = 'success') {
     'beforeend',
     `<p class="rating-inline-message small mt-2 mb-0 text-${type === 'success' ? 'success' : 'danger'}">${message}</p>`
   )
+
+  const messageElement = holder.querySelector('.rating-inline-message')
+  if (messageElement && type === 'success') {
+    window.setTimeout(() => messageElement.remove(), 2200)
+  }
 }
 
 export function bindInlineRatingControls(authState) {
-  document.querySelectorAll('.rating-star[data-joke-id]').forEach((button) => {
-    button.addEventListener('click', async (event) => {
-      event.preventDefault()
-      event.stopPropagation()
+  document.querySelectorAll('.rating-stars').forEach((container) => {
+    const resetToCurrent = () => {
+      clearHoverStars(container)
+      setStars(container, Number(container.dataset.currentRating || 0))
+    }
 
-      if (!authState.loggedIn) {
-        window.location.assign('/login.html')
-        return
-      }
+    container.querySelectorAll('.rating-star[data-joke-id]').forEach((button) => {
+      button.addEventListener('mouseenter', () => setHoverStars(container, Number(button.dataset.rating || 0)))
+      button.addEventListener('focus', () => setHoverStars(container, Number(button.dataset.rating || 0)))
 
-      const jokeId = button.dataset.jokeId
-      const rating = Number(button.dataset.rating)
-      const container = button.closest('.rating-stars')
+      button.addEventListener('mouseleave', resetToCurrent)
+      button.addEventListener('blur', resetToCurrent)
 
-      if (!container || !jokeId || !rating) {
-        return
-      }
+      button.addEventListener('click', async (event) => {
+        event.preventDefault()
+        event.stopPropagation()
 
-      try {
-        setLoading(container, true)
-        await rateJoke({ jokeId, userId: authState.user.id, rating })
-        setStars(container, rating)
-
-        const summaries = await fetchRatingSummaries([jokeId])
-        const summary = summaries.get(jokeId)
-        const summaryElement = document.querySelector(`[data-rating-summary-for="${jokeId}"]`)
-        if (summaryElement && summary) {
-          summaryElement.innerHTML = `<span class="joke-rating-summary-star" aria-hidden="true">★</span><span>${summary.average.toFixed(1)} / ${summary.count} votes</span>`
+        if (!authState.loggedIn) {
+          window.location.assign('/login.html')
+          return
         }
 
-        showMessage(container, 'Rating saved.')
-      } catch (error) {
-        setStars(container, Number(container.dataset.currentRating || 0))
-        showMessage(container, error instanceof Error ? error.message : 'Unable to save your rating right now.', 'danger')
-      }
+        const jokeId = button.dataset.jokeId
+        const rating = Number(button.dataset.rating)
+
+        if (!jokeId || !rating) {
+          return
+        }
+
+        try {
+          setLoading(container, true)
+          await rateJoke({ jokeId, userId: authState.user.id, rating })
+          container.dataset.currentRating = String(rating)
+          clearHoverStars(container)
+          setStars(container, rating)
+
+          const summaries = await fetchRatingSummaries([jokeId])
+          const summary = summaries.get(jokeId)
+          const summaryElement = document.querySelector(`[data-rating-summary-for="${jokeId}"]`)
+          if (summaryElement && summary) {
+            summaryElement.innerHTML = `<span class="joke-rating-summary-star" aria-hidden="true">★</span><span>${summary.average.toFixed(1)} / ${summary.count} votes</span>`
+          }
+
+          showMessage(container, 'Rating saved.')
+        } catch (error) {
+          resetToCurrent()
+          showMessage(container, error instanceof Error ? error.message : 'Unable to save your rating right now.', 'danger')
+        } finally {
+          setLoading(container, false)
+        }
+      })
     })
   })
 }

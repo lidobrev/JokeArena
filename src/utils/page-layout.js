@@ -24,9 +24,10 @@ export function renderStars({ jokeId, currentRating = 0 } = {}) {
   }).join('')
 }
 
-export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text, author, authorHref = '/profile.html', reactions, rating = 0, href, id, imageUrl }) {
+export function renderFeaturedJokeCard({ category, categorySlug = '', title = 'Untitled joke', text, author, authorHref = '/profile.html', reactions, rating = 0, href, id, imageUrl }) {
   const numericRating = Number(rating) || 0
   const safeCategory = escapeHtml(category)
+  const safeCategorySlug = escapeHtml(categorySlug || String(category || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, ''))
   const safeTitle = escapeHtml(title)
   const safeText = escapeHtml(text)
   const safeAuthor = escapeHtml(author)
@@ -40,18 +41,16 @@ export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text
 
   return `
     <div class="col-lg-4 col-md-6">
-      <article class="card joke-card h-100 border-0 shadow-sm">
+      <article class="card joke-card h-100 border-0 shadow-sm${safeImageUrl ? ' has-image' : ' no-image'}">
         <a class="joke-card-overlay" href="${safeHref}" aria-label="View joke details"></a>
 
-        <div class="joke-card-image-wrap">
-          ${safeImageUrl
-            ? `<img class="joke-card-image" src="${safeImageUrl}" alt="${safeTitle}" loading="lazy" />`
-            : `<div class="joke-card-image-placeholder" aria-hidden="true"><span></span></div>`}
-        </div>
+        ${safeImageUrl
+          ? `<a class="joke-card-image-wrap" href="${safeHref}" aria-label="Open ${safeTitle}"><img class="joke-card-image" src="${safeImageUrl}" alt="${safeTitle}" loading="lazy" /></a>`
+          : ''}
 
         <div class="card-body p-4 d-flex flex-column position-relative">
           <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
-            <span class="badge rounded-pill joke-category">${safeCategory}</span>
+            <a class="badge rounded-pill joke-category joke-category-link" href="/category-jokes.html?category=${safeCategorySlug}">${safeCategory}</a>
             <span class="joke-rating-summary" data-rating-summary-for="${safeId}"><span class="joke-rating-summary-star" aria-hidden="true">★</span><span>${numericRating.toFixed(1)} / ${escapeHtml(reactions)} votes</span></span>
           </div>
 
@@ -71,7 +70,6 @@ export function renderFeaturedJokeCard({ category, title = 'Untitled joke', text
     </div>
   `
 }
-
 export function renderFormField({ label, type = 'text', name, placeholder, value = '', options = [], selectedValue = '' }) {
   const safeLabel = escapeHtml(label)
   const safeName = escapeHtml(name)
@@ -120,14 +118,18 @@ export function renderFormField({ label, type = 'text', name, placeholder, value
   `
 }
 
-export function renderStatCard({ icon, label, value }) {
+export function renderStatCard({ icon, label, value, href }) {
+  const cardInner = `
+    <div class="stat-card h-100 p-4 rounded-4">
+      <div class="stat-icon mb-3">${escapeHtml(icon)}</div>
+      <p class="text-uppercase small fw-semibold text-body-secondary mb-2">${escapeHtml(label)}</p>
+      <h3 class="h4 mb-0">${escapeHtml(value)}</h3>
+    </div>
+  `
+
   return `
     <div class="col-sm-6 col-lg-4">
-      <div class="stat-card h-100 p-4 rounded-4">
-        <div class="stat-icon mb-3">${escapeHtml(icon)}</div>
-        <p class="text-uppercase small fw-semibold text-body-secondary mb-2">${escapeHtml(label)}</p>
-        <h3 class="h4 mb-0">${escapeHtml(value)}</h3>
-      </div>
+      ${href ? `<a class="stat-card-link d-block h-100" href="${escapeHtml(href)}">${cardInner}</a>` : cardInner}
     </div>
   `
 }
@@ -136,12 +138,12 @@ export function renderMiniJokeCard({ id, category, title, reactions, status, ima
   const href = id ? `/joke-details.html?id=${escapeHtml(id)}` : '#'
   const statusBadge = status ? `<span class="badge rounded-pill ${status === 'approved' ? 'text-bg-success' : 'text-bg-warning'}">${escapeHtml(status)}</span>` : ''
   const imageMarkup = imageUrl
-    ? `<img class="mini-joke-image" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" loading="lazy" />`
-    : '<div class="mini-joke-image mini-joke-image-placeholder" aria-hidden="true"></div>'
+    ? `<a class="mini-joke-media d-block mb-3" href="${href}"><img class="mini-joke-image" src="${escapeHtml(imageUrl)}" alt="${escapeHtml(title)}" loading="lazy" /></a>`
+    : ''
 
   return `
     <article class="mini-joke-card p-3 rounded-4 h-100">
-      <a class="mini-joke-media d-block mb-3" href="${href}">${imageMarkup}</a>
+      ${imageMarkup}
       <div class="d-flex align-items-center justify-content-between mb-2 gap-2">
         <span class="badge rounded-pill joke-category">${escapeHtml(category)}</span>
         ${statusBadge}
@@ -162,6 +164,7 @@ export function renderJokeGrid(jokes) {
       renderFeaturedJokeCard({
         id: joke.id,
         category: joke.category,
+        categorySlug: joke.categorySlug,
         title: joke.title,
         text: joke.content,
         author: joke.authorName,
@@ -201,20 +204,17 @@ export function renderCategorySlider(categories = []) {
             <p class="text-uppercase small fw-semibold text-body-secondary mb-1">Browse by topic</p>
             <h2 class="h4 fw-bold mb-0">Joke Categories</h2>
           </div>
-          <div class="category-slider-controls d-none d-lg-flex gap-2" aria-label="Category slider controls">
+          <div class="category-slider-controls d-none d-lg-flex gap-2 is-hidden" data-category-controls aria-label="Category slider controls">
             <button class="btn btn-outline-dark category-slider-btn" type="button" data-category-prev aria-label="Scroll categories left">‹</button>
             <button class="btn btn-outline-dark category-slider-btn" type="button" data-category-next aria-label="Scroll categories right">›</button>
           </div>
         </div>
-        <div class="category-slider-shell">
-          <div class="category-slider" data-category-slider aria-label="Joke categories">
-            ${categories.map((category) => `
-              <a class="category-chip" href="/category-jokes.html?category=${escapeHtml(category.slug)}">
-                <span>${escapeHtml(category.name)}</span>
-                <small>View jokes</small>
-              </a>
-            `).join('')}
-          </div>
+        <div class="category-slider" data-category-slider aria-label="Joke categories">
+          ${categories.map((category) => `
+            <a class="category-chip" href="/category-jokes.html?category=${escapeHtml(category.slug)}">
+              <span>${escapeHtml(category.name)}</span>
+            </a>
+          `).join('')}
         </div>
       </div>
     </section>

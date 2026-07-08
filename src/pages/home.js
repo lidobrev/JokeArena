@@ -1,15 +1,13 @@
 import { bindLogoutButton, getAuthState } from '../services/authService.js'
-import { fetchApprovedJokes, fetchCategories, fetchTopRatedJokes } from '../services/jokeService.js'
-import { fetchCreators } from '../services/profileService.js'
+import { fetchApprovedJokes, fetchApprovedJokesCount, fetchCategories, fetchTopRatedJokes } from '../services/jokeService.js'
+import { fetchCreators, fetchCreatorsCount } from '../services/profileService.js'
 import { escapeHtml, setDocumentTitle } from '../utils/dom.js'
 import { renderCategorySlider, renderCreatorsGrid, renderJokeGrid, renderPageShell, renderSeeMoreButton, renderStatCard } from '../utils/page-layout.js'
 import { bindInlineRatingControls } from '../utils/rating-ui.js'
 
-function buildMainHtml(authState, categories, latestJokes, topRatedJokes, creators) {
+function buildMainHtml(authState, categories, latestJokes, topRatedJokes, creators, creatorsCount, approvedJokesCount) {
   const allPreviewJokes = [...latestJokes, ...topRatedJokes]
   const totalVotes = allPreviewJokes.reduce((sum, joke) => sum + joke.ratingCount, 0)
-  const weightedRating = allPreviewJokes.reduce((sum, joke) => sum + joke.ratingAverage * joke.ratingCount, 0)
-  const averageRating = totalVotes > 0 ? weightedRating / totalVotes : 0
   const heroBadge = authState.loggedIn ? 'Signed in' : 'Guest browsing'
   const heroTitle = authState.loggedIn
     ? `Welcome back${authState.profile?.display_name ? `, ${authState.profile.display_name}` : ''}`
@@ -46,9 +44,9 @@ function buildMainHtml(authState, categories, latestJokes, topRatedJokes, creato
     <section class="py-4 py-lg-5 border-top border-opacity-10">
       <div class="container">
         <div class="row g-3">
-          ${renderStatCard({ icon: '🤣', label: 'Latest jokes', value: latestJokes.length.toString() })}
-          ${renderStatCard({ icon: '⭐', label: 'Average rating', value: totalVotes ? averageRating.toFixed(1) : '0.0' })}
-          ${renderStatCard({ icon: '🗳️', label: 'Total votes', value: totalVotes.toString() })}
+          ${renderStatCard({ icon: '🃏', label: 'Jokes', value: approvedJokesCount.toString(), href: '/latest-jokes.html' })}
+          ${renderStatCard({ icon: '🎙️', label: 'Joke Creators', value: creatorsCount.toString(), href: '/creators.html' })}
+          ${renderStatCard({ icon: '🗳️', label: 'Total votes', value: totalVotes.toString(), href: '/latest-jokes.html' })}
         </div>
       </div>
     </section>
@@ -96,28 +94,43 @@ function buildMainHtml(authState, categories, latestJokes, topRatedJokes, creato
 
 function bindCategorySlider() {
   const slider = document.querySelector('[data-category-slider]')
+  const controls = document.querySelector('[data-category-controls]')
   const prev = document.querySelector('[data-category-prev]')
   const next = document.querySelector('[data-category-next]')
 
-  if (!slider || !prev || !next) return
+  if (!slider || !controls || !prev || !next) return
+
+  const hasDesktopOverflow = () => window.matchMedia('(min-width: 992px)').matches && slider.scrollWidth > slider.clientWidth + 4
+
+  const updateControls = () => {
+    controls.classList.toggle('is-hidden', !hasDesktopOverflow())
+    if (!hasDesktopOverflow()) return
+    prev.disabled = slider.scrollLeft <= 4
+    next.disabled = slider.scrollLeft + slider.clientWidth >= slider.scrollWidth - 4
+  }
 
   const scrollAmount = () => Math.max(280, Math.floor(slider.clientWidth * 0.75))
   prev.addEventListener('click', () => slider.scrollBy({ left: -scrollAmount(), behavior: 'smooth' }))
   next.addEventListener('click', () => slider.scrollBy({ left: scrollAmount(), behavior: 'smooth' }))
+  slider.addEventListener('scroll', updateControls, { passive: true })
+  window.addEventListener('resize', updateControls)
+  window.setTimeout(updateControls, 50)
 }
 
 async function boot() {
   setDocumentTitle('Home')
 
-  const [authState, categories, latestJokes, topRatedJokes, creators] = await Promise.all([
+  const [authState, categories, latestJokes, topRatedJokes, creators, creatorsCount, approvedJokesCount] = await Promise.all([
     getAuthState(),
     fetchCategories(),
     fetchApprovedJokes({ limit: 9 }),
     fetchTopRatedJokes({ limit: 9 }),
     fetchCreators({ limit: 4 }).catch(() => []),
+    fetchCreatorsCount().catch(() => 0),
+    fetchApprovedJokesCount().catch(() => latestJokes.length),
   ])
 
-  document.querySelector('#app').innerHTML = renderPageShell('home', buildMainHtml(authState, categories, latestJokes, topRatedJokes, creators), authState)
+  document.querySelector('#app').innerHTML = renderPageShell('home', buildMainHtml(authState, categories, latestJokes, topRatedJokes, creators, creatorsCount, approvedJokesCount), authState)
   bindLogoutButton()
   bindInlineRatingControls(authState)
   bindCategorySlider()
