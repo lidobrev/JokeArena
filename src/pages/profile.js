@@ -46,14 +46,13 @@ function renderEditForm(profile, authState) {
             <p class="text-uppercase small fw-semibold text-body-secondary mb-1">Account settings</p>
             <h2 class="h4 fw-bold mb-0">Edit Profile</h2>
           </div>
-          <span class="badge rounded-pill joke-pill">Supabase Storage avatar</span>
         </div>
         <form id="profile-edit-form" novalidate>
           ${renderFormField({ label: 'Display name', name: 'display_name', placeholder: 'Your public name', value: profile.display_name || '' })}
           <div class="mb-3">
             <label class="form-label fw-semibold" for="profile-email">Email</label>
             <input class="form-control form-control-lg" id="profile-email" type="email" value="${escapeHtml(email)}" readonly />
-            <p class="form-text mb-0">Email is managed by Supabase Auth and cannot be changed from this profile page.</p>
+            <p class="form-text mb-0">Email cannot be changed from this profile page.</p>
           </div>
           ${renderFormField({ label: 'Avatar image', type: 'file', name: 'avatar' })}
           <div class="d-flex flex-column flex-sm-row gap-3">
@@ -76,7 +75,6 @@ function renderPasswordForm() {
             <p class="text-uppercase small fw-semibold text-body-secondary mb-1">Security</p>
             <h2 class="h4 fw-bold mb-0">Change Password</h2>
           </div>
-          <span class="badge rounded-pill joke-pill">Supabase Auth</span>
         </div>
         <form id="password-change-form" novalidate>
           ${renderFormField({ label: 'New password', type: 'password', name: 'newPassword', placeholder: 'Enter a new password' })}

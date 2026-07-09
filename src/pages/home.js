@@ -10,11 +10,11 @@ function buildMainHtml(authState, categories, latestJokes, topRatedJokes, creato
   const totalVotes = allPreviewJokes.reduce((sum, joke) => sum + joke.ratingCount, 0)
   const heroBadge = authState.loggedIn ? 'Signed in' : 'Guest browsing'
   const heroTitle = authState.loggedIn
-    ? `Welcome back${authState.profile?.display_name ? `, ${authState.profile.display_name}` : ''}`
+    ? `Welcome${authState.profile?.display_name ? `, ${authState.profile.display_name}` : ''}`
     : 'JokeArena - Where jokes battle for laughs'
   const heroCopy = authState.loggedIn
-    ? 'Post a joke, rate the feed, and keep your profile moving up the rankings.'
-    : 'Share jokes, vote for the funniest ones, and climb the comedy leaderboard.'
+    ? 'Share your funniest jokes, rate the best ones, and join the fun.'
+    : 'Share your best jokes, vote on others, and enjoy the community.'
   const primaryAction = authState.loggedIn ? '/create-joke.html' : '/register.html'
   const primaryLabel = authState.loggedIn ? 'Create Joke' : 'Join the Arena'
   const secondaryAction = authState.loggedIn ? '/profile.html' : '/login.html'

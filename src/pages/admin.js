@@ -28,11 +28,13 @@ function renderAdminTabs(activeTab) {
   ]
 
   return `
-    <ul class="nav admin-tabs mb-4">
-      ${tabs
-        .map(([id, label]) => `<li class="nav-item"><a class="nav-link${activeTab === id ? ' active' : ''}" href="${tabHref(id)}">${label}</a></li>`)
-        .join('')}
-    </ul>
+    <div class="admin-tabs-wrapper mb-4" aria-label="Admin sections">
+      <ul class="nav nav-pills admin-tabs flex-nowrap mb-0">
+        ${tabs
+          .map(([id, label]) => `<li class="nav-item"><a class="nav-link${activeTab === id ? ' active' : ''}" href="${tabHref(id)}">${label}</a></li>`)
+          .join('')}
+      </ul>
+    </div>
   `
 }
 
