@@ -50,7 +50,9 @@ async function boot() {
         <div class="page-header mb-4">
           <span class="badge rounded-pill joke-pill mb-3">Category</span>
           <h1 class="display-5 fw-bold mb-3">${escapeHtml(category?.name || 'Category')} Jokes</h1>
-          <p class="lead text-body-secondary mb-0">Browse approved jokes from this category, 36 per page.</p>
+          <p class="lead text-body-secondary mb-0">
+            ${escapeHtml(category?.description || 'Browse approved jokes from this category.')}
+          </p>
         </div>
         ${renderJokeGrid(jokes)}
         ${renderPagination(slug, page, totalCount)}
