@@ -2830,3 +2830,168 @@ a:focus-visible {
     font-size: 2.7rem !important;
   }
 }
+/* Admin mobile table redesign */
+@media (max-width: 575.98px) {
+  .admin-table-card {
+    overflow: visible !important;
+    border-radius: 1.35rem !important;
+  }
+
+  .admin-table-card .card-body,
+  .admin-table-card .table-responsive {
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .admin-table-card table,
+  .admin-table-card thead,
+  .admin-table-card tbody,
+  .admin-table-card tr,
+  .admin-table-card th,
+  .admin-table-card td {
+    display: block;
+    width: 100%;
+  }
+
+  .admin-table-card thead {
+    display: none !important;
+  }
+
+  .admin-table-card tbody {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .admin-table-card tbody tr {
+    position: relative;
+    margin: 0 !important;
+    padding: 1rem !important;
+    overflow: hidden;
+    border: 1px solid rgba(15, 23, 42, 0.09) !important;
+    border-radius: 1.15rem !important;
+    background: #fff !important;
+    box-shadow: 0 10px 26px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  .admin-table-card tbody tr::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    background: linear-gradient(
+      180deg,
+      var(--jokearena-purple),
+      var(--jokearena-pink)
+    );
+  }
+
+  .admin-table-card tbody td {
+    display: grid !important;
+    grid-template-columns: minmax(5.5rem, 34%) minmax(0, 1fr);
+    gap: 0.8rem;
+    align-items: start;
+    min-width: 0;
+    padding: 0.72rem 0 !important;
+    border: 0 !important;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.07) !important;
+    background: transparent !important;
+    color: var(--jokearena-ink);
+    line-height: 1.5;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-table-card tbody td:last-child {
+    padding-bottom: 0 !important;
+    border-bottom: 0 !important;
+  }
+
+  .admin-table-card tbody td:first-child {
+    padding-top: 0 !important;
+  }
+
+  .admin-table-card tbody td::before {
+    content: attr(data-label);
+    padding-top: 0.08rem;
+    color: #64748b;
+    font-size: 0.69rem;
+    font-weight: 800;
+    line-height: 1.35;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+
+  .admin-table-card tbody td[colspan] {
+    display: block !important;
+    padding: 1rem !important;
+    text-align: center;
+  }
+
+  .admin-table-card tbody td[colspan]::before {
+    display: none !important;
+    content: none !important;
+  }
+
+  .admin-table-card tbody td[data-label="Metadata"],
+  .admin-table-card tbody td[data-label="METADATA"] {
+    grid-template-columns: 1fr !important;
+    gap: 0.45rem;
+  }
+
+  .admin-table-card tbody td[data-label="Metadata"]::before,
+  .admin-table-card tbody td[data-label="METADATA"]::before {
+    margin-bottom: 0.1rem;
+  }
+
+  .admin-table-card tbody td code,
+  .admin-table-card tbody td pre {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0.75rem 0.8rem;
+    overflow-x: auto;
+    border: 1px solid rgba(238, 75, 139, 0.14);
+    border-radius: 0.85rem;
+    color: #c0266d;
+    background: rgba(238, 75, 139, 0.055);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-table-card tbody td .badge {
+    width: fit-content;
+    max-width: 100%;
+    justify-self: start;
+    padding: 0.42rem 0.7rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+  }
+
+  .admin-table-card tbody td .btn,
+  .admin-table-card tbody td .btn-sm {
+    width: 100%;
+    min-height: 2.65rem;
+  }
+
+  .admin-table-card .d-flex.flex-wrap.gap-2,
+  .admin-table-card td[data-label="Actions"] > div,
+  .admin-table-card td[data-label="ACTIONS"] > div {
+    display: grid !important;
+    grid-template-columns: 1fr;
+    gap: 0.55rem !important;
+    width: 100%;
+  }
+
+  .admin-table-card .admin-user-avatar,
+  .admin-table-card .admin-joke-thumb {
+    width: 3.5rem;
+    height: 3.5rem;
+  }
+}
