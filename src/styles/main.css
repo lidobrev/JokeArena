@@ -2163,3 +2163,522 @@ a:focus-visible {
     height: 2.6rem;
   }
 }
+
+/* ========================================================================== 
+   JokeArena 21st-century UI refresh
+   - neutral logout button
+   - modern button system
+   - polished pagination
+   - full-width profile joke lists
+   ========================================================================== */
+
+:root {
+  --jokearena-control-radius: 0.9rem;
+  --jokearena-control-height: 2.75rem;
+  --jokearena-control-shadow: 0 10px 24px rgba(15, 23, 42, 0.10);
+  --jokearena-control-shadow-hover: 0 16px 34px rgba(15, 23, 42, 0.16);
+}
+
+/* Modern, consistent buttons */
+.btn {
+  min-height: var(--jokearena-control-height);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--jokearena-control-radius);
+  padding: 0.68rem 1.05rem;
+  border-width: 1px;
+  font-weight: 750;
+  letter-spacing: -0.01em;
+  box-shadow: var(--jokearena-control-shadow);
+  transition:
+    transform 180ms cubic-bezier(.2,.8,.2,1),
+    box-shadow 180ms ease,
+    background-color 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease;
+}
+
+.btn:hover,
+.btn:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: var(--jokearena-control-shadow-hover);
+}
+
+.btn:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.10);
+}
+
+.btn-sm {
+  min-height: 2.25rem;
+  padding: 0.48rem 0.78rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+}
+
+.btn-lg {
+  min-height: 3.25rem;
+  padding: 0.85rem 1.3rem;
+  border-radius: 1rem;
+}
+
+.btn-primary {
+  border-color: transparent;
+  color: #fff;
+  background: linear-gradient(135deg, var(--jokearena-purple), #8577ff 52%, var(--jokearena-pink));
+}
+
+.btn-primary:hover,
+.btn-primary:focus-visible {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, #5d4bf1, #7868ff 52%, #e74183);
+}
+
+.btn-secondary,
+.btn-outline-secondary,
+.btn-outline-dark {
+  color: var(--jokearena-ink);
+  border-color: rgba(15, 23, 42, 0.12);
+  background: rgba(255, 255, 255, 0.78);
+  backdrop-filter: blur(12px);
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus-visible,
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus-visible,
+.btn-outline-dark:hover,
+.btn-outline-dark:focus-visible {
+  color: var(--jokearena-ink);
+  border-color: rgba(105, 87, 255, 0.24);
+  background: #fff;
+}
+
+.btn-danger,
+.btn-outline-danger {
+  border-color: rgba(220, 38, 38, 0.18);
+  color: #b91c1c;
+  background: rgba(254, 242, 242, 0.9);
+}
+
+.btn-danger:hover,
+.btn-danger:focus-visible,
+.btn-outline-danger:hover,
+.btn-outline-danger:focus-visible {
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #991b1b;
+  background: #fee2e2;
+}
+
+/* Logout must look like the other neutral navigation controls (Admin, Profile, etc.) */
+.joke-navbar [data-logout-button],
+.navbar [data-logout-button],
+.joke-navbar .logout-button,
+.navbar .logout-button,
+.joke-navbar .btn-logout,
+.navbar .btn-logout {
+  min-height: auto;
+  padding: 0.55rem 0.95rem !important;
+  border: 0 !important;
+  border-radius: 999px !important;
+  color: rgba(255, 255, 255, 0.82) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 1rem;
+  font-weight: 400 !important;
+}
+
+.joke-navbar [data-logout-button]:hover,
+.joke-navbar [data-logout-button]:focus-visible,
+.navbar [data-logout-button]:hover,
+.navbar [data-logout-button]:focus-visible,
+.joke-navbar .logout-button:hover,
+.joke-navbar .logout-button:focus-visible,
+.navbar .logout-button:hover,
+.navbar .logout-button:focus-visible,
+.joke-navbar .btn-logout:hover,
+.joke-navbar .btn-logout:focus-visible,
+.navbar .btn-logout:hover,
+.navbar .btn-logout:focus-visible {
+  color: #fff !important;
+  background: rgba(255, 255, 255, 0.10) !important;
+  transform: translateY(-1px);
+  box-shadow: none !important;
+}
+
+/* Pagination as clear modern controls */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 2rem;
+}
+
+.pagination .page-item {
+  margin: 0;
+}
+
+.pagination .page-link {
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 !important;
+  padding: 0.55rem 0.8rem;
+  border: 1px solid rgba(15, 23, 42, 0.10);
+  border-radius: 0.85rem !important;
+  color: var(--jokearena-ink);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  font-weight: 800;
+  line-height: 1;
+  backdrop-filter: blur(12px);
+  transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease, background 160ms ease, color 160ms ease;
+}
+
+.pagination .page-link:hover,
+.pagination .page-link:focus-visible {
+  z-index: 2;
+  color: var(--jokearena-purple);
+  border-color: rgba(105, 87, 255, 0.26);
+  background: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.13);
+}
+
+.pagination .page-item.active .page-link,
+.pagination .active > .page-link {
+  color: #fff;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--jokearena-purple), var(--jokearena-pink));
+  box-shadow: 0 12px 26px rgba(105, 87, 255, 0.28);
+}
+
+.pagination .page-item.disabled .page-link {
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.52);
+  box-shadow: none;
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+/* Profile page: published and pending jokes occupy the full content width. */
+.profile-page,
+.profile-layout,
+.profile-content,
+.profile-main,
+.profile-jokes-section,
+.profile-jokes-list,
+.profile-published-jokes,
+.profile-pending-jokes,
+[data-profile-jokes],
+[data-published-jokes],
+[data-pending-jokes] {
+  min-width: 0;
+}
+
+.profile-layout,
+.profile-page .row.profile-layout,
+.profile-page .profile-grid {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: 1.5rem;
+}
+
+.profile-page .profile-sidebar,
+.profile-layout .profile-sidebar,
+.profile-page aside.profile-card {
+  width: 100%;
+  max-width: none;
+}
+
+.profile-jokes-section,
+.profile-jokes-list,
+.profile-published-jokes,
+.profile-pending-jokes,
+[data-profile-jokes],
+[data-published-jokes],
+[data-pending-jokes] {
+  width: 100% !important;
+  max-width: none !important;
+  grid-column: 1 / -1 !important;
+}
+
+.profile-jokes-list,
+.profile-published-jokes,
+.profile-pending-jokes,
+[data-profile-jokes],
+[data-published-jokes],
+[data-pending-jokes] {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  gap: 1.25rem;
+}
+
+/* Bootstrap layouts: force joke-list columns below the profile header/sidebar row. */
+.profile-page .row > [class*="col-"]:has(.profile-jokes-section),
+.profile-page .row > [class*="col-"]:has(.profile-published-jokes),
+.profile-page .row > [class*="col-"]:has(.profile-pending-jokes),
+.profile-page .row > [class*="col-"]:has([data-profile-jokes]),
+.profile-page .row > [class*="col-"]:has([data-published-jokes]),
+.profile-page .row > [class*="col-"]:has([data-pending-jokes]) {
+  flex: 0 0 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* Common tab-pane structure used on profile pages. */
+.profile-page .tab-content,
+.profile-page .tab-pane,
+.profile-card + .tab-content,
+.profile-card ~ .tab-content {
+  width: 100%;
+  max-width: none;
+}
+
+.profile-page .tab-pane .mini-joke-card,
+.profile-jokes-list .mini-joke-card,
+.profile-published-jokes .mini-joke-card,
+.profile-pending-jokes .mini-joke-card {
+  height: 100%;
+}
+
+@media (max-width: 991.98px) {
+  .joke-navbar [data-logout-button],
+  .navbar [data-logout-button],
+  .joke-navbar .logout-button,
+  .navbar .logout-button,
+  .joke-navbar .btn-logout,
+  .navbar .btn-logout {
+    width: 100% !important;
+    min-height: 3rem;
+    justify-content: flex-start;
+    margin-top: 0 !important;
+    padding: 0.72rem 0.9rem !important;
+    border-radius: 0.9rem !important;
+    color: rgba(255, 255, 255, 0.82) !important;
+    background: transparent !important;
+  }
+
+  .joke-navbar [data-logout-button]:hover,
+  .joke-navbar [data-logout-button]:focus-visible,
+  .navbar [data-logout-button]:hover,
+  .navbar [data-logout-button]:focus-visible {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+    transform: none;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .pagination {
+    gap: 0.35rem;
+  }
+
+  .pagination .page-link {
+    min-width: 2.55rem;
+    min-height: 2.55rem;
+    padding: 0.48rem 0.65rem;
+    border-radius: 0.75rem !important;
+  }
+
+  .profile-jokes-list,
+  .profile-published-jokes,
+  .profile-pending-jokes,
+  [data-profile-jokes],
+  [data-published-jokes],
+  [data-pending-jokes] {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* === Category bar cleanup: no full-width shadow/background behind buttons === */
+.category-slider-shell,
+.category-slider-wrapper,
+.categories-section,
+.categories-bar,
+.category-list,
+.category-scroll,
+.category-slider {
+  background: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  border: 0 !important;
+}
+
+.category-slider-shell::before,
+.category-slider-shell::after,
+.category-slider-wrapper::before,
+.category-slider-wrapper::after,
+.categories-section::before,
+.categories-section::after,
+.categories-bar::before,
+.categories-bar::after,
+.category-slider::before,
+.category-slider::after {
+  content: none !important;
+  display: none !important;
+  box-shadow: none !important;
+  background: none !important;
+}
+
+/* Keep only a clean, subtle border on each category button. */
+.category-chip,
+.category-slider .category-chip,
+.category-slider a,
+.category-slider button {
+  box-shadow: none !important;
+  filter: none !important;
+  border: 1px solid rgba(15, 23, 42, 0.10) !important;
+  background: rgba(255, 255, 255, 0.88) !important;
+}
+
+.category-chip:hover,
+.category-chip:focus-visible,
+.category-slider .category-chip:hover,
+.category-slider .category-chip:focus-visible,
+.category-slider a:hover,
+.category-slider a:focus-visible,
+.category-slider button:hover,
+.category-slider button:focus-visible {
+  box-shadow: none !important;
+  filter: none !important;
+  border-color: rgba(105, 87, 255, 0.28) !important;
+  background: #fff !important;
+  transform: translateY(-2px);
+}
+
+/* Prevent parent cards/utilities from painting a strip behind the category row. */
+.category-slider-shell.card,
+.category-slider-wrapper.card,
+.categories-section.card,
+.categories-bar.card,
+.category-slider-shell.rounded-4,
+.category-slider-wrapper.rounded-4 {
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* === Category row hard reset (v2) ===
+   Removes the full-width haze/shadow visible behind the category pills. */
+.category-slider-shell,
+.category-slider-wrapper,
+.category-slider-controls,
+.category-slider,
+.categories-section,
+.categories-bar,
+.category-list,
+.category-scroll,
+[class*="category-slider"],
+[class*="categories-bar"] {
+  background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  text-shadow: none !important;
+  border: 0 !important;
+  outline: 0 !important;
+}
+
+.category-slider-shell::before,
+.category-slider-shell::after,
+.category-slider-wrapper::before,
+.category-slider-wrapper::after,
+.category-slider-controls::before,
+.category-slider-controls::after,
+.category-slider::before,
+.category-slider::after,
+.categories-section::before,
+.categories-section::after,
+.categories-bar::before,
+.categories-bar::after,
+.category-list::before,
+.category-list::after,
+.category-scroll::before,
+.category-scroll::after {
+  content: none !important;
+  display: none !important;
+}
+
+/* Some layouts put the category row inside a generic card/glass panel. */
+.category-slider-shell.card,
+.category-slider-wrapper.card,
+.categories-section.card,
+.categories-bar.card,
+.category-slider-shell.hero-card,
+.category-slider-wrapper.hero-card,
+.category-slider-shell.rounded-4,
+.category-slider-wrapper.rounded-4,
+.category-slider-shell[class*="shadow"],
+.category-slider-wrapper[class*="shadow"],
+.categories-section[class*="shadow"],
+.categories-bar[class*="shadow"] {
+  padding-block: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* Category pills: clean surface, no glow or long shadow. */
+.category-slider > *,
+.category-slider .category-chip,
+.category-slider a,
+.category-slider button,
+.category-chip {
+  box-shadow: none !important;
+  filter: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.category-slider .category-chip,
+.category-slider a,
+.category-slider button,
+.category-chip {
+  border: 1px solid rgba(15, 23, 42, 0.11) !important;
+  background: #fff !important;
+}
+
+.category-slider .category-chip:hover,
+.category-slider .category-chip:focus-visible,
+.category-slider a:hover,
+.category-slider a:focus-visible,
+.category-slider button:hover,
+.category-slider button:focus-visible,
+.category-chip:hover,
+.category-chip:focus-visible {
+  background: #fff !important;
+  border-color: rgba(105, 87, 255, 0.34) !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08) !important;
+  filter: none !important;
+  transform: translateY(-1px);
+}
+
+/* No visible scrollbar track/strip behind the pills. */
+.category-slider {
+  scrollbar-width: none !important;
+  padding-bottom: 0 !important;
+}
+
+.category-slider::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
