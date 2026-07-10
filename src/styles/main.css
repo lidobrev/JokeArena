@@ -1152,7 +1152,6 @@ a:focus-visible {
   border: 1px solid rgba(15, 23, 42, 0.08);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.72);
-  box-shadow: var(--jokearena-shadow);
   width: fit-content;
   max-width: 100%;
 }
@@ -1167,7 +1166,6 @@ a:focus-visible {
 .admin-tabs .nav-link.active {
   color: #161b2d;
   background: linear-gradient(135deg, var(--jokearena-accent), #ffd76a);
-  box-shadow: 0 10px 24px rgba(248, 181, 0, 0.25);
 }
 
 .admin-user-avatar,
@@ -1567,7 +1565,6 @@ a:focus-visible {
   font-weight: 900;
   line-height: 1;
   background: rgba(255,255,255,0.82);
-  box-shadow: var(--jokearena-shadow);
 }
 
 @media (max-width: 991.98px) {
@@ -1616,7 +1613,6 @@ a:focus-visible {
 
 .category-slider {
   gap: 0.75rem;
-  padding: 0.15rem 0 0.75rem;
 }
 
 .category-chip {
@@ -2000,7 +1996,6 @@ a:focus-visible {
   border: 1px solid rgba(15, 23, 42, 0.08) !important;
   border-radius: 999px !important;
   background: rgba(255, 255, 255, 0.72) !important;
-  box-shadow: var(--jokearena-shadow) !important;
 }
 
 .admin-tabs .nav-item {
@@ -2019,5 +2014,152 @@ a:focus-visible {
 
   .admin-tabs {
     border-radius: 999px !important;
+  }
+}
+
+/* === Navbar polish: consistent logout, clean toggler, improved mobile menu === */
+.joke-navbar [data-logout-button] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.65rem;
+  margin: 0;
+  padding: 0.55rem 0.95rem !important;
+  border: 1px solid rgba(248, 181, 0, 0.22) !important;
+  border-radius: 999px !important;
+  font-size: 1rem;
+  font-weight: 700 !important;
+  line-height: 1.5;
+  white-space: nowrap;
+  box-shadow: none;
+}
+
+.joke-navbar .navbar-toggler,
+.joke-navbar .navbar-toggler:hover,
+.joke-navbar .navbar-toggler:focus,
+.joke-navbar .navbar-toggler:focus-visible,
+.joke-navbar .navbar-toggler:active {
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+.joke-navbar .navbar-toggler {
+  width: 2.9rem;
+  height: 2.9rem;
+  padding: 0.55rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.07);
+  transition: background-color 180ms ease, transform 180ms ease;
+}
+
+.joke-navbar .navbar-toggler:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.joke-navbar .navbar-toggler[aria-expanded="true"] {
+  background: rgba(248, 181, 0, 0.16);
+  transform: rotate(2deg);
+}
+
+@media (max-width: 991.98px) {
+  .joke-navbar {
+    padding-block: 0.7rem;
+  }
+
+  .joke-navbar .navbar-collapse {
+    margin-top: 0.8rem;
+    padding: 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.09);
+    border-radius: 1.25rem;
+    background: linear-gradient(180deg, rgba(26, 35, 50, 0.98), rgba(14, 22, 33, 0.98));
+    box-shadow: 0 22px 55px rgba(0, 0, 0, 0.28);
+  }
+
+  .joke-navbar .navbar-nav {
+    align-items: stretch !important;
+    gap: 0.45rem !important;
+    margin-bottom: 0 !important;
+  }
+
+  .joke-navbar .nav-item {
+    width: 100%;
+  }
+
+  .joke-navbar .nav-pill,
+  .joke-navbar [data-logout-button] {
+    width: 100% !important;
+    min-height: 3rem;
+    justify-content: flex-start;
+    padding: 0.72rem 0.9rem !important;
+    border-radius: 0.9rem !important;
+    text-align: left;
+  }
+
+  .joke-navbar .nav-pill {
+    color: rgba(255, 255, 255, 0.82) !important;
+    background: transparent;
+  }
+
+  .joke-navbar .nav-pill:hover,
+  .joke-navbar .nav-pill:focus-visible {
+    color: #fff !important;
+    background: rgba(255, 255, 255, 0.08);
+    transform: none;
+  }
+
+  .joke-navbar .nav-pill.active {
+    color: #171b26 !important;
+    background: linear-gradient(135deg, var(--jokearena-accent), #ffd76a);
+  }
+
+  .joke-navbar [data-logout-button] {
+    margin-top: 0.25rem;
+    color: #171b26;
+    background: linear-gradient(135deg, var(--jokearena-accent), #ffd76a);
+  }
+
+  .joke-navbar [data-logout-button]:hover,
+  .joke-navbar [data-logout-button]:focus-visible {
+    color: #171b26;
+    transform: none;
+    box-shadow: 0 10px 24px rgba(248, 181, 0, 0.22);
+  }
+}
+
+@media (min-width: 992px) {
+  .joke-navbar [data-logout-button] {
+    min-width: auto;
+  }
+}
+
+/* === Navbar logo + logout weight override === */
+.joke-navbar [data-logout-button] {
+  font-weight: 400 !important;
+}
+
+.joke-navbar .navbar-brand {
+  display: inline-flex;
+  align-items: center;
+  width: 10rem;
+  height: 3rem;
+  padding: 0;
+  overflow: hidden;
+  color: transparent !important;
+  font-size: 0 !important;
+  letter-spacing: 0 !important;
+  background: url('../assets/logo.png') left center / contain no-repeat;
+}
+
+.joke-navbar .navbar-brand .brand-mark,
+.joke-navbar .navbar-brand > img,
+.joke-navbar .navbar-brand > span {
+  display: none !important;
+}
+
+@media (max-width: 575.98px) {
+  .joke-navbar .navbar-brand {
+    width: 8.5rem;
+    height: 2.6rem;
   }
 }
