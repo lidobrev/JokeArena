@@ -2682,3 +2682,151 @@ a:focus-visible {
   width: 0 !important;
   height: 0 !important;
 }
+
+/* === Stat cards: clean background icons === */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* The icon is a quiet background detail — no glow, rotation or animation. */
+.stat-card .stat-icon,
+.stat-card > .stat-icon {
+  position: absolute;
+  z-index: 0;
+  top: 0.5rem;
+  left: 0.75rem;
+  display: block;
+  width: auto;
+  height: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: var(--jokearena-ink);
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 4.75rem;
+  line-height: 1;
+  opacity: 0.055;
+  filter: none !important;
+  transform: none !important;
+  transition: none !important;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Keep text and numbers readable above the decorative icon. */
+.stat-card .card-body,
+.stat-card .stat-card-body {
+  position: relative;
+  z-index: 1;
+}
+
+/* Disable inherited card/icon effects for this section. */
+.stat-card::before,
+.stat-card::after {
+  content: none !important;
+  display: none !important;
+}
+
+.stat-card:hover .stat-icon,
+.stat-card:focus-within .stat-icon {
+  opacity: 0.055;
+  filter: none !important;
+  transform: none !important;
+}
+
+@media (max-width: 575.98px) {
+  .stat-card .stat-icon,
+  .stat-card > .stat-icon {
+    top: 0.4rem;
+    left: 0.6rem;
+    font-size: 4rem;
+  }
+}
+
+.stat-card {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  --stat-icon-color: var(--jokearena-purple);
+}
+
+.stat-card .card-body,
+.stat-card .stat-card-body {
+  position: relative;
+  z-index: 1;
+  padding-right: 6.5rem;
+}
+
+.stat-card .stat-icon,
+.stat-card > .stat-icon {
+  position: absolute !important;
+  top: 1.15rem !important;
+  right: 1.25rem !important;
+  left: auto !important;
+  z-index: 0 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 4.75rem !important;
+  height: 4.75rem !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  color: var(--stat-icon-color) !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  font-size: 3.2rem !important;
+  line-height: 1 !important;
+  opacity: 0.7 !important;
+  filter: none !important;
+  transform: none !important;
+  transition: opacity 180ms ease !important;
+  pointer-events: none !important;
+  user-select: none !important;
+}
+
+.stat-card:hover .stat-icon,
+.stat-card:focus-within .stat-icon {
+  opacity: 0.88 !important;
+  filter: none !important;
+  transform: none !important;
+}
+
+.stat-card-link:nth-child(4n + 1) .stat-card,
+.row > [class*="col"]:nth-child(4n + 1) .stat-card {
+  --stat-icon-color: var(--jokearena-purple);
+}
+
+.stat-card-link:nth-child(4n + 2) .stat-card,
+.row > [class*="col"]:nth-child(4n + 2) .stat-card {
+  --stat-icon-color: var(--jokearena-pink);
+}
+
+.stat-card-link:nth-child(4n + 3) .stat-card,
+.row > [class*="col"]:nth-child(4n + 3) .stat-card {
+  --stat-icon-color: var(--jokearena-orange);
+}
+
+.stat-card-link:nth-child(4n + 4) .stat-card,
+.row > [class*="col"]:nth-child(4n + 4) .stat-card {
+  --stat-icon-color: var(--jokearena-cyan);
+}
+
+@media (max-width: 575.98px) {
+  .stat-card .card-body,
+  .stat-card .stat-card-body {
+    padding-right: 5.25rem;
+  }
+
+  .stat-card .stat-icon,
+  .stat-card > .stat-icon {
+    top: 1rem !important;
+    right: 1rem !important;
+    width: 4rem !important;
+    height: 4rem !important;
+    font-size: 2.7rem !important;
+  }
+}

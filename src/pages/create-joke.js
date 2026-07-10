@@ -50,7 +50,7 @@ async function boot() {
   if (!categories.length) {
     document.querySelector('#app').innerHTML = renderPageShell(
       'create-joke',
-      '<div class="container py-5"><div class="alert alert-warning" role="alert">No joke categories are available. Run the Supabase seed/migration first.</div></div>',
+      '<div class="container py-5"><div class="alert alert-warning" role="alert">No joke categories are available.</div></div>',
       authState,
     )
     bindLogoutButton()

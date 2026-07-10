@@ -140,7 +140,7 @@ function renderUsersTab(users) {
     : '<tr><td colspan="4" class="text-body-secondary">No users found.</td></tr>'
 
   return `
-    <div class="alert alert-warning" role="alert">Deleting a user here removes their app profile, roles, jokes, ratings, avatar, and joke images. Supabase Auth user deletion requires a secure server/Edge Function with a service role key.</div>
+    <div class="alert alert-warning" role="alert">Deleting a user here removes their app profile, roles, jokes, ratings, avatar, and joke images.</div>
     <div class="card admin-table-card border-0 shadow-sm">
       <div class="card-body p-4 p-xl-5">
         <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4"><div><p class="text-uppercase small fw-semibold text-body-secondary mb-1">Accounts</p><h2 class="h4 fw-bold mb-0">Users</h2></div><span class="badge rounded-pill joke-pill">Roles and deletion</span></div>
@@ -301,7 +301,7 @@ function bindAdminActions() {
   document.querySelectorAll('[data-delete-user-id]').forEach((button) => {
     button.addEventListener('click', async () => {
       const name = button.dataset.deleteUserName || 'this user'
-      const warning = `Delete all app data for ${name}? This removes their profile, roles, jokes, ratings, avatar, and joke images. The Supabase Auth account itself requires secure server-side deletion.`
+      const warning = `Delete all app data for ${name}? This removes their profile, roles, jokes, ratings, avatar, and joke images.`
       if (!window.confirm(warning)) return
       try {
         button.disabled = true
