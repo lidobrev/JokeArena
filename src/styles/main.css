@@ -2995,3 +2995,81 @@ a:focus-visible {
     height: 3.5rem;
   }
 }
+
+/* === Mobile page-section header spacing fix ===
+   Applies to headers such as:
+   AUDIT TRAIL / Activity log / Latest 100
+   MODERATION QUEUE / Pending jokes / Live data
+*/
+@media (max-width: 575.98px) {
+  .d-flex.align-items-center.justify-content-between.flex-wrap.gap-3.mb-4 {
+    width: auto !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+    margin: 0 0 1.25rem !important;
+    padding: 1rem !important;
+    gap: 0.75rem !important;
+    align-items: flex-start !important;
+  }
+
+  .d-flex.align-items-center.justify-content-between.flex-wrap.gap-3.mb-4 > div {
+    min-width: 0 !important;
+    flex: 1 1 10rem !important;
+  }
+
+  .d-flex.align-items-center.justify-content-between.flex-wrap.gap-3.mb-4 > div > :first-child {
+    margin-top: 0 !important;
+  }
+
+  .d-flex.align-items-center.justify-content-between.flex-wrap.gap-3.mb-4 > .badge {
+    width: auto !important;
+    max-width: 100% !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    align-self: flex-start !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 359.98px) {
+  .d-flex.align-items-center.justify-content-between.flex-wrap.gap-3.mb-4 {
+    flex-direction: column !important;
+  }
+}
+
+/* === Definitive mobile section-header fix === */
+@media (max-width: 575.98px) {
+  .d-flex.align-items-center.justify-content-between.flex-wrap.gap-3.mb-4 {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: flex-start !important;
+    align-content: flex-start !important;
+    justify-content: space-between !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 0 1.25rem !important;
+    padding: 1rem !important;
+    gap: 0.75rem !important;
+  }
+
+  .d-flex.align-items-center.justify-content-between.flex-wrap.gap-3.mb-4 > div {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+  }
+
+  .d-flex.align-items-center.justify-content-between.flex-wrap.gap-3.mb-4 > .badge {
+    flex: 0 0 auto !important;
+    align-self: flex-start !important;
+    margin: 0 !important;
+    width: auto !important;
+    white-space: nowrap !important;
+  }
+}
+
+@media (max-width: 319.98px) {
+  .d-flex.align-items-center.justify-content-between.flex-wrap.gap-3.mb-4 {
+    flex-direction: column !important;
+  }
+}
